@@ -1,179 +1,162 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import MultipleChoiceTask from './tasks/MultipleChoiceTask';
+import SentenceBuildingTask from './tasks/SentenceBuildingTask';
+import PronunciationTask from './tasks/PronunciationTask';
+import PracticeResults from './PracticeResults';
+import { saveLessonResult, addToErrorDictionary } from '../utils/progress';
+import { isSilentMode } from '../utils/settings';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
+function buildTaskQueue(words, silent) {
+  const tasks = [];
+
+  // 1. Multiple choice for all words
+  words.forEach(w => {
+    if (w.distractors && w.distractors.length >= 3) {
+      tasks.push({ type: 'choice', word: w, maxScore: 5 });
+    }
+  });
+
+  // 2. Sentence building for words that have sentences
+  const withSentences = words.filter(w => w.sentences && w.sentences.length > 0);
+  withSentences.slice(0, 5).forEach(w => {
+    tasks.push({ type: 'sentence', word: w, maxScore: 8 });
+  });
+
+  // 3. Pronunciation (if not silent mode)
+  if (!silent) {
+    words.slice(0, 3).forEach(w => {
+      tasks.push({ type: 'pronunciation', word: w, maxScore: 8 });
+    });
+  }
+
+  return tasks;
+}
+
 function PracticeView() {
-  const { levelId, lessonId } = useParams();
+  const { chapterId, lessonId } = useParams();
   const navigate = useNavigate();
   const [words, setWords] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answer, setAnswer] = useState('');
-  const [feedback, setFeedback] = useState('');
-  const [feedbackClass, setFeedbackClass] = useState('');
-  const [inputClass, setInputClass] = useState('');
-  const [score, setScore] = useState(0);
-  const [attempts, setAttempts] = useState(0);
+  const [taskQueue, setTaskQueue] = useState([]);
+  const [currentTaskIdx, setCurrentTaskIdx] = useState(0);
+  const [scores, setScores] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [finished, setFinished] = useState(false);
-  const inputRef = useRef(null);
+  const silent = isSilentMode();
 
   useEffect(() => {
-    fetch(`${API_URL}/levels/${levelId}/lesson/${lessonId}`)
-      .then(res => res.json())
+    fetch(`${API_URL}/chapters/${chapterId}/lesson/${lessonId}`)
+      .then(r => r.json())
       .then(data => {
-        const shuffled = (data.words || []).sort(() => Math.random() - 0.5);
-        setWords(shuffled);
+        const w = data.words || [];
+        setWords(w);
+        setTaskQueue(buildTaskQueue(w, silent));
+        setLoading(false);
       })
-      .catch(() => {});
-  }, [levelId, lessonId]);
+      .catch(() => setLoading(false));
+  }, [chapterId, lessonId, silent]);
 
-  useEffect(() => {
-    if (inputRef.current) inputRef.current.focus();
-  }, [currentIndex]);
+  const handleTaskComplete = (score, maxScore) => {
+    const task = taskQueue[currentTaskIdx];
 
-  const checkAnswer = () => {
-    if (!answer.trim()) return;
-    const correct = words[currentIndex].word.toLowerCase();
-    const userAnswer = answer.trim().toLowerCase();
-    setAttempts(attempts + 1);
+    if (score < maxScore * 0.5 && task.word) {
+      addToErrorDictionary(task.word.word, task.word.hungarian, task.type, '');
+    }
 
-    if (userAnswer === correct) {
-      setScore(score + 1);
-      setFeedback('Helyes! ✓');
-      setFeedbackClass('correct');
-      setInputClass('correct');
-      setTimeout(() => {
-        if (currentIndex < words.length - 1) {
-          setCurrentIndex(currentIndex + 1);
-          setAnswer('');
-          setFeedback('');
-          setFeedbackClass('');
-          setInputClass('');
-        } else {
-          setFinished(true);
-        }
-      }, 1000);
+    const newScores = [...scores, { type: task.type, score, maxScore }];
+    setScores(newScores);
+
+    if (currentTaskIdx < taskQueue.length - 1) {
+      setCurrentTaskIdx(currentTaskIdx + 1);
     } else {
-      setFeedback(`Próbáld újra! A helyes válasz: ${correct}`);
-      setFeedbackClass('incorrect');
-      setInputClass('incorrect');
-      setTimeout(() => {
-        setInputClass('');
-      }, 1500);
+      const totalScore = newScores.reduce((sum, s) => sum + s.score, 0);
+      const totalMax = newScores.reduce((sum, s) => sum + s.maxScore, 0);
+      saveLessonResult(parseInt(chapterId), parseInt(lessonId), totalScore, totalMax);
+      setFinished(true);
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') checkAnswer();
-  };
-
-  if (words.length === 0) {
-    return (
-      <div>
-        <nav className="navbar">
-          <Link to={`/level/${levelId}/lesson/${lessonId}`} className="navbar-back">← Vissza</Link>
-          <Link to="/" className="navbar-logo">Play<span>ENG</span> 3000</Link>
-          <div style={{ width: 60 }}></div>
-        </nav>
-        <div className="practice-container" style={{ textAlign: 'center', paddingTop: 120 }}>
-          <p>Betöltés...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="page">
+      <NavBar chapterId={chapterId} lessonId={lessonId} />
+      <div className="loading">Betoltes...</div>
+    </div>
+  );
 
   if (finished) {
-    const percentage = Math.round((score / words.length) * 100);
+    const totalScore = scores.reduce((sum, s) => sum + s.score, 0);
+    const totalMax = scores.reduce((sum, s) => sum + s.maxScore, 0);
     return (
-      <div>
-        <nav className="navbar">
-          <Link to={`/level/${levelId}`} className="navbar-back">← Szintek</Link>
-          <Link to="/" className="navbar-logo">Play<span>ENG</span> 3000</Link>
-          <div style={{ width: 60 }}></div>
-        </nav>
-        <div className="practice-container">
-          <div className="practice-card">
-            <h2 style={{ fontSize: 20, marginBottom: 16, color: '#1d1d1f' }}>Lecke teljesítve!</h2>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>
-              {percentage >= 80 ? '🏆' : percentage >= 60 ? '👏' : '💪'}
-            </div>
-            <div className="practice-score">
-              <strong>{percentage}%</strong>
-              {score} / {words.length} helyes válasz
-            </div>
-            <div style={{ marginTop: 32, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  setCurrentIndex(0);
-                  setScore(0);
-                  setAttempts(0);
-                  setFinished(false);
-                  setAnswer('');
-                  setFeedback('');
-                  const shuffled = [...words].sort(() => Math.random() - 0.5);
-                  setWords(shuffled);
-                }}
-              >
-                Újra próbálom
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => navigate(`/level/${levelId}`)}
-              >
-                Következő lecke →
-              </button>
-            </div>
+      <div className="page">
+        <NavBar chapterId={chapterId} lessonId={lessonId} />
+        <div className="container">
+          <div className="practice-page">
+            <PracticeResults
+              score={totalScore}
+              maxScore={totalMax}
+              scores={scores}
+              onRetry={() => {
+                setCurrentTaskIdx(0);
+                setScores([]);
+                setFinished(false);
+                setTaskQueue(buildTaskQueue(words, silent));
+              }}
+              onNext={() => navigate(`/level/1`)}
+            />
           </div>
         </div>
       </div>
     );
   }
 
-  const word = words[currentIndex];
+  if (taskQueue.length === 0) return (
+    <div className="page">
+      <NavBar chapterId={chapterId} lessonId={lessonId} />
+      <div className="container"><div className="loading">Nincs feladat ehhez a leckehez.</div></div>
+    </div>
+  );
+
+  const currentTask = taskQueue[currentTaskIdx];
 
   return (
-    <div>
-      <nav className="navbar">
-        <Link to={`/level/${levelId}/lesson/${lessonId}`} className="navbar-back">← Vissza</Link>
-        <Link to="/" className="navbar-logo">Play<span>ENG</span> 3000</Link>
-        <div style={{ width: 60 }}></div>
-      </nav>
-
-      <div className="practice-container">
-        <div className="lesson-progress">
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${((currentIndex + 1) / words.length) * 100}%` }}></div>
+    <div className="page">
+      <NavBar chapterId={chapterId} lessonId={lessonId} />
+      <div className="container">
+        <div className="practice-page">
+          <div className="progress-wrap">
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: `${((currentTaskIdx + 1) / taskQueue.length) * 100}%` }} />
+            </div>
+            <div className="progress-text">{currentTaskIdx + 1} / {taskQueue.length}</div>
           </div>
-          <div className="progress-text">{currentIndex + 1} / {words.length}</div>
-        </div>
 
-        <div className="practice-card">
-          <h2>Írd be az angol szót</h2>
-          <div className="practice-word">{word.hungarian}</div>
-          {word.sentences && word.sentences[0] && (
-            <p style={{ color: '#6e6e73', marginBottom: 24, fontSize: 14 }}>
-              Tipp: „{word.sentences[0].en.replace(new RegExp(word.word, 'gi'), '____')}"
-            </p>
+          {currentTask.type === 'choice' && (
+            <MultipleChoiceTask key={currentTaskIdx} word={currentTask.word} onComplete={handleTaskComplete} />
           )}
-          <input
-            ref={inputRef}
-            type="text"
-            className={`practice-input ${inputClass}`}
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Írd be angolul..."
-            autoComplete="off"
-            autoCapitalize="off"
-          />
-          <div className={`practice-feedback ${feedbackClass}`}>{feedback}</div>
-          <button className="btn btn-primary" onClick={checkAnswer}>
-            Ellenőrzés
-          </button>
+          {currentTask.type === 'sentence' && (
+            <SentenceBuildingTask key={currentTaskIdx} word={currentTask.word} onComplete={handleTaskComplete} />
+          )}
+          {currentTask.type === 'pronunciation' && (
+            <PronunciationTask key={currentTaskIdx} word={currentTask.word} onComplete={handleTaskComplete} />
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+function NavBar({ chapterId, lessonId }) {
+  return (
+    <nav className="nav">
+      <Link to={`/chapter/${chapterId}/lesson/${lessonId}`} className="nav-back">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
+        Vissza
+      </Link>
+      <Link to="/" className="nav-logo">Play<span>ENG</span> 3000</Link>
+      <div style={{width: 60}} />
+    </nav>
   );
 }
 
