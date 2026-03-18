@@ -1,17 +1,24 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Trophy, RotateCcw, ArrowLeft } from "lucide-react";
+import { Trophy, RotateCcw, ArrowLeft, BookOpen, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 
 interface Props {
   score: number;
   maxScore: number;
   errors: { wordId: number; word: string }[];
+  chapterName?: string;
   onBack: () => void;
   onRetry: () => void;
 }
 
-const ResultsScreen = ({ score, maxScore, errors, onBack, onRetry }: Props) => {
+const ResultsScreen = ({ score, maxScore, errors, chapterName, onBack, onRetry }: Props) => {
+  const navigate = useNavigate();
   const percentage = Math.round((score / maxScore) * 100);
+  const [aiFeedback, setAiFeedback] = useState<string | null>(null);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
+
   const grade =
     percentage >= 90
       ? { text: "Kiváló!", color: "text-success" }
@@ -20,6 +27,34 @@ const ResultsScreen = ({ score, maxScore, errors, onBack, onRetry }: Props) => {
       : percentage >= 50
       ? { text: "Jó kezdés!", color: "text-foreground" }
       : { text: "Gyakorolj tovább!", color: "text-destructive" };
+
+  // Fetch AI feedback
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      setLoadingFeedback(true);
+      try {
+        const res = await fetch("/api/ai/lesson-feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            score,
+            maxScore,
+            errors,
+            chapterName: chapterName || "",
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.feedback) {
+            setAiFeedback(data.feedback);
+          }
+        }
+      } catch {}
+      setLoadingFeedback(false);
+    };
+
+    fetchFeedback();
+  }, [score, maxScore, errors, chapterName]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,6 +120,32 @@ const ResultsScreen = ({ score, maxScore, errors, onBack, onRetry }: Props) => {
           </div>
         </motion.div>
 
+        {/* AI Feedback */}
+        {(aiFeedback || loadingFeedback) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="w-full bg-gradient-to-br from-primary/5 to-primary/10 rounded-[24px] border border-primary/20 p-6"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <p className="text-sm font-medium text-primary">AI Tutor visszajelzés</p>
+            </div>
+            {loadingFeedback ? (
+              <motion.p
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+                className="text-sm text-muted-foreground"
+              >
+                Gondolkodom...
+              </motion.p>
+            ) : (
+              <p className="text-sm text-foreground leading-relaxed">{aiFeedback}</p>
+            )}
+          </motion.div>
+        )}
+
         {errors.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -106,6 +167,13 @@ const ResultsScreen = ({ score, maxScore, errors, onBack, onRetry }: Props) => {
                 </span>
               ))}
             </div>
+            <button
+              onClick={() => navigate("/error-dictionary")}
+              className="mt-4 flex items-center gap-2 text-sm text-primary hover:underline"
+            >
+              <BookOpen className="w-4 h-4" />
+              Hibaszótár megnyitása
+            </button>
           </motion.div>
         )}
 

@@ -154,6 +154,7 @@ const PracticePage = () => {
         score={totalScore}
         maxScore={maxPossible}
         errors={errors}
+        chapterName={lesson.chapterName}
         onBack={() => navigate(`/chapter/${chapterId}`)}
         onRetry={() => {
           setCurrentTaskIndex(0);

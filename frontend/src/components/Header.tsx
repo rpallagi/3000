@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useState } from "react";
+import { isSilent, setSoundMode } from "@/utils/settings";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const Header = () => {
   const { resolvedTheme, toggleTheme } = useTheme();
   const isHome = location.pathname === "/";
   const [menuOpen, setMenuOpen] = useState(false);
+  const [silent, setSilent] = useState(isSilent());
 
   const handleNavClick = (hash: string) => {
     setMenuOpen(false);
@@ -21,6 +23,12 @@ const Header = () => {
         document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
       }, 300);
     }
+  };
+
+  const toggleSoundMode = () => {
+    const newMode = silent ? "normal" : "silent";
+    setSoundMode(newMode);
+    setSilent(newMode === "silent");
   };
 
   return (
@@ -45,6 +53,27 @@ const Header = () => {
             className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
           >
             Módszer
+          </button>
+
+          {/* Sound/Silent mode toggle */}
+          <button
+            onClick={toggleSoundMode}
+            className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            title={silent ? "Hangos mód" : "Néma mód (buszon, munkahelyen)"}
+          >
+            {silent ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                <line x1="23" x2="17" y1="9" y2="15"/>
+                <line x1="17" x2="23" y1="9" y2="15"/>
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              </svg>
+            )}
           </button>
 
           {/* Dark mode toggle */}
@@ -103,6 +132,13 @@ const Header = () => {
                         </span>
                       )}
                     </div>
+                    <button
+                      onClick={() => { navigate("/error-dictionary"); setMenuOpen(false); }}
+                      className="w-full text-left px-4 py-3 text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-3"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                      Hibaszótár
+                    </button>
                     <button
                       onClick={() => { navigate("/tutor"); setMenuOpen(false); }}
                       className="w-full text-left px-4 py-3 text-sm text-foreground hover:bg-accent transition-colors flex items-center gap-3"

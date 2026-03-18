@@ -144,6 +144,58 @@ def register_data_routes(app):
     def health():
         return jsonify({"status": "ok", "totalWords": load_data()['meta']['totalWords']})
 
+    @app.route('/api/ai/lesson-feedback', methods=['POST'])
+    def ai_lesson_feedback():
+        """Generate AI feedback for a completed lesson."""
+        api_key = app.config.get('CLAUDE_API_KEY')
+        if not api_key:
+            return jsonify({'feedback': None}), 200
+
+        req_data = request.get_json()
+        if not req_data:
+            return jsonify({'error': 'Missing data'}), 400
+
+        score = req_data.get('score', 0)
+        max_score = req_data.get('maxScore', 1)
+        errors = req_data.get('errors', [])
+        chapter_name = req_data.get('chapterName', '')
+
+        error_words = ', '.join([e.get('word', '') for e in errors[:10]])
+        pct = round((score / max_score) * 100) if max_score > 0 else 0
+
+        prompt = f"""A Hungarian student just completed an English lesson about "{chapter_name}".
+Score: {score}/{max_score} ({pct}%)
+Words they struggled with: {error_words or 'none'}
+
+Give a brief, encouraging feedback in Hungarian (2-3 sentences max).
+If they had errors, give ONE practical tip about the most common error word.
+Be warm and motivating like a supportive tutor."""
+
+        import requests as http_requests
+        try:
+            resp = http_requests.post(
+                'https://api.anthropic.com/v1/messages',
+                headers={
+                    'x-api-key': api_key,
+                    'anthropic-version': '2023-06-01',
+                    'content-type': 'application/json',
+                },
+                json={
+                    'model': 'claude-haiku-4-5-20251001',
+                    'max_tokens': 200,
+                    'messages': [{'role': 'user', 'content': prompt}],
+                },
+                timeout=10,
+            )
+            if resp.status_code == 200:
+                result = resp.json()
+                feedback = result['content'][0]['text']
+                return jsonify({'feedback': feedback})
+        except Exception:
+            pass
+
+        return jsonify({'feedback': None}), 200
+
 
 # Create app instance for gunicorn
 app = create_app()

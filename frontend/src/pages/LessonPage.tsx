@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Volume2, ArrowRight } from "lucide-react";
+import { ArrowLeft, Volume2, ArrowRight, Lock } from "lucide-react";
 import Header from "@/components/Header";
 import { fetchLesson, LessonData, WordData } from "@/utils/api";
 import { speak } from "@/utils/tts";
@@ -14,6 +14,7 @@ const LessonPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [speaking, setSpeaking] = useState(false);
+  const [hasListened, setHasListened] = useState(false);
 
   useEffect(() => {
     if (!chapterId || !lessonId) return;
@@ -21,6 +22,36 @@ const LessonPage = () => {
       .then(setLesson)
       .finally(() => setLoading(false));
   }, [chapterId, lessonId]);
+
+  // Reset listening state when word changes
+  useEffect(() => {
+    if (isSilent()) {
+      setHasListened(true); // In silent mode, skip listening requirement
+    } else {
+      setHasListened(false);
+    }
+  }, [currentIndex]);
+
+  // Auto-play word when it appears (mandatory first listen)
+  useEffect(() => {
+    if (!lesson || isSilent()) return;
+    const word = lesson.words[currentIndex];
+    if (!word) return;
+
+    const timer = setTimeout(async () => {
+      setSpeaking(true);
+      try {
+        await speak(word.word);
+        if (word.sentences?.[0]) {
+          await speak(word.sentences[0].en, "en-US", 0.85);
+        }
+        setHasListened(true);
+      } catch {}
+      setSpeaking(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [currentIndex, lesson]);
 
   const handleSpeak = async (word: WordData) => {
     if (isSilent()) return;
@@ -30,6 +61,7 @@ const LessonPage = () => {
       if (word.sentences?.[0]) {
         await speak(word.sentences[0].en, "en-US", 0.85);
       }
+      setHasListened(true);
     } catch {}
     setSpeaking(false);
   };
@@ -39,7 +71,6 @@ const LessonPage = () => {
     if (currentIndex < lesson.words.length - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
-      // All words observed, go to practice
       navigate(`/chapter/${chapterId}/lesson/${lessonId}/practice`);
     }
   };
@@ -105,8 +136,11 @@ const LessonPage = () => {
           />
         </div>
 
-        <p className="text-sm text-muted-foreground tracking-widest uppercase font-medium mb-8">
+        <p className="text-sm text-muted-foreground tracking-widest uppercase font-medium mb-2">
           Figyelj meg
+        </p>
+        <p className="text-xs text-muted-foreground mb-8">
+          Hallgasd meg a szót és a példamondatot. Nem kell semmit csinálnod, csak figyelj.
         </p>
 
         <AnimatePresence mode="wait">
@@ -128,7 +162,9 @@ const LessonPage = () => {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleSpeak(word)}
                 disabled={speaking}
-                className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  speaking ? "bg-primary/20 animate-pulse" : "bg-primary/10 hover:bg-primary/20"
+                }`}
               >
                 <Volume2 className={`w-5 h-5 text-primary ${speaking ? "animate-pulse" : ""}`} />
               </motion.button>
@@ -191,16 +227,32 @@ const LessonPage = () => {
             Előző
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={hasListened ? { scale: 1.02 } : {}}
+            whileTap={hasListened ? { scale: 0.98 } : {}}
             onClick={handleNext}
-            className="flex-1 sm:flex-none px-8 py-3.5 bg-primary text-primary-foreground rounded-full text-sm font-medium
-              hover:opacity-90 transition-opacity flex items-center justify-center gap-2 active:scale-95"
+            disabled={!hasListened}
+            className={`flex-1 sm:flex-none px-8 py-3.5 rounded-full text-sm font-medium
+              flex items-center justify-center gap-2 active:scale-95 transition-all ${
+              hasListened
+                ? "bg-primary text-primary-foreground hover:opacity-90"
+                : "bg-muted text-muted-foreground cursor-not-allowed"
+            }`}
           >
+            {!hasListened && <Lock className="w-3.5 h-3.5" />}
             {isLast ? "Gyakorlás" : "Következő"}
-            <ArrowRight className="w-4 h-4" />
+            {hasListened && <ArrowRight className="w-4 h-4" />}
           </motion.button>
         </div>
+
+        {!hasListened && !isSilent() && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-xs text-muted-foreground mt-3"
+          >
+            Hallgasd meg a szót a továbblépéshez
+          </motion.p>
+        )}
       </div>
     </div>
   );

@@ -97,6 +97,30 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Daily Challenge Banner */}
+      <section className="w-full flex justify-center px-5 sm:px-6">
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          onClick={() => navigate("/daily")}
+          className="max-w-2xl w-full bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-5 sm:p-6 flex items-center justify-between hover:border-primary/40 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-foreground">Napi kihívás</p>
+              <p className="text-xs text-muted-foreground">Fordíts le egy mondatot 30 mp alatt! +15 pont</p>
+            </div>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary flex-shrink-0"><path d="m9 18 6-6-6-6"/></svg>
+        </motion.button>
+      </section>
+
       {/* Levels */}
       <section id="levels" className="w-full flex flex-col items-center py-16 sm:py-20 px-5 sm:px-6">
         <motion.p

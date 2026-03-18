@@ -13,6 +13,8 @@ import PracticePage from "./pages/PracticePage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import SubscriptionPage from "./pages/SubscriptionPage.tsx";
 import TutorPage from "./pages/TutorPage.tsx";
+import ErrorDictionaryPage from "./pages/ErrorDictionaryPage.tsx";
+import DailyChallengePage from "./pages/DailyChallengePage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -34,6 +36,8 @@ const App = () => (
               <Route path="/chapter/:chapterId" element={<ChapterPage />} />
               <Route path="/chapter/:chapterId/lesson/:lessonId" element={<LessonPage />} />
               <Route path="/chapter/:chapterId/lesson/:lessonId/practice" element={<PracticePage />} />
+              <Route path="/error-dictionary" element={<ErrorDictionaryPage />} />
+              <Route path="/daily" element={<DailyChallengePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
