@@ -18,9 +18,9 @@ def init_security(app):
     limiter.init_app(app)
 
     # Stricter limits for auth endpoints
-    limiter.limit('10 per minute')(
-        app.blueprints.get('oauth', None) or app
-    )
+    oauth_bp = app.blueprints.get('oauth')
+    if oauth_bp:
+        limiter.limit('10 per minute')(oauth_bp)
 
     # Security headers via Talisman
     Talisman(
