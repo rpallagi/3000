@@ -60,9 +60,9 @@ Deploy `angolozzunk.hu` as a subscription-based English learning platform with s
 | F2 | **Progress sync szerverre** — localStorage → PostgreSQL | KÉSZ | saveLessonResult() auto-sync, syncProgressFromServer() merge |
 | F3 | **Gyenge szavak célzott gyakorlás** — Hibaszótárból task indítás | KÉSZ | /weak-words-practice — teljes PlayENG flow (choice+sentence+pronunciation) |
 | F4 | **Streak vizualizáció** — naptár, badge, motivációs üzenetek | KÉSZ | Főoldalon 7 napos naptár + motivációs üzenetek (1-30+ nap) |
-| F5 | **AI Tutor chat UI javítás** — beszéd + válasz, chapter context | HÁTRAVAN | |
-| F6 | **PWA telepítés** — manifest, service worker, offline cache | HÁTRAVAN | |
-| F7 | **Analitika** — Plausible (GDPR-kompatibilis) | HÁTRAVAN | |
+| F5 | **AI Tutor chat UI javítás** — beszéd + válasz, chapter context | KÉSZ | ?chapter=N param, shared TTS, chapter link |
+| F6 | **PWA telepítés** — manifest, service worker, offline cache | KÉSZ | sw.js, network-first, offline fallback |
+| F7 | **Analitika** — Plausible (GDPR-kompatibilis) | HÁTRAVAN | Roland: Plausible fiók + script hozzáadás |
 | F8 | **ÁSZF + Adatvédelem** oldalak | KÉSZ | /terms + /privacy — GDPR, footer linkek |
 | F9 | **Szóspecifikus magyar kiejtési tippek** | HÁTRAVAN | PronunciationTask-ban van hardcoded tipp, de szóspecifikus nincs |
 
