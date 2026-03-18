@@ -54,7 +54,7 @@ const Index = () => {
       <ExerciseDemo />
 
       {/* Method section */}
-      <section id="method" className="w-full flex flex-col items-center py-20 px-6">
+      <section id="method" className="w-full flex flex-col items-center py-16 sm:py-20 px-5 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -98,7 +98,7 @@ const Index = () => {
       </section>
 
       {/* Levels */}
-      <section id="levels" className="w-full flex flex-col items-center py-20 px-6">
+      <section id="levels" className="w-full flex flex-col items-center py-16 sm:py-20 px-5 sm:px-6">
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

@@ -80,7 +80,7 @@ const LessonPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="pt-24 pb-20 px-6 max-w-2xl mx-auto flex flex-col items-center">
+      <div className="pt-20 sm:pt-24 pb-24 sm:pb-20 px-4 sm:px-6 max-w-2xl mx-auto flex flex-col items-center safe-bottom">
         <div className="w-full flex items-center justify-between mb-8">
           <motion.button
             initial={{ opacity: 0, x: -10 }}

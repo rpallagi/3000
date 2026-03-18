@@ -166,7 +166,7 @@ const TutorPage = () => {
         </div>
 
         {/* Input */}
-        <div className="border-t border-border p-4">
+        <div className="border-t border-border p-4 safe-bottom">
           <div className="flex gap-2 items-end">
             {/* Mic button */}
             <button

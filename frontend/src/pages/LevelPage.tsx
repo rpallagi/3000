@@ -76,7 +76,7 @@ const LevelPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="pt-24 pb-20 px-6 max-w-2xl mx-auto">
+      <div className="pt-20 sm:pt-24 pb-24 sm:pb-20 px-4 sm:px-6 max-w-2xl mx-auto">
         <motion.button
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}

@@ -18,7 +18,7 @@ const LevelCard = ({ level, title, subtitle, wordRange, active = false, locked =
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1], delay: level * 0.08 }}
-    className={`w-full text-left p-8 rounded-[32px] border transition-colors
+    className={`w-full text-left p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border transition-colors
       ${active 
         ? "bg-card border-primary/30" 
         : locked 
