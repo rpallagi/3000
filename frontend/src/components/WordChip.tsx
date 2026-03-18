@@ -11,7 +11,7 @@ const WordChip = ({ word, onClick, disabled = false, selected = false }: WordChi
   <motion.button
     whileHover={!disabled ? { y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" } : {}}
     whileTap={!disabled ? { scale: 0.95 } : {}}
-    className={`px-6 py-3 rounded-full text-lg font-medium transition-colors border
+    className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-base sm:text-lg font-medium transition-colors border
       ${selected 
         ? "bg-primary text-primary-foreground border-primary" 
         : "bg-card text-foreground border-chip-border hover:border-chip-hover"}

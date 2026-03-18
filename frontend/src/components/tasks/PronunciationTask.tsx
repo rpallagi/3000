@@ -96,7 +96,7 @@ const PronunciationTask = ({ word, onComplete }: Props) => {
       </p>
 
       <div className="flex items-center gap-3">
-        <h2 className="text-4xl md:text-5xl font-semibold text-foreground">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground">
           {word.wordDisplay || word.word}
         </h2>
         <motion.button

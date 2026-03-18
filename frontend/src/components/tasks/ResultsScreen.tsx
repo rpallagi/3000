@@ -24,7 +24,7 @@ const ResultsScreen = ({ score, maxScore, errors, onBack, onRetry }: Props) => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="pt-24 pb-20 px-6 max-w-lg mx-auto flex flex-col items-center gap-8">
+      <div className="pt-20 sm:pt-24 pb-24 sm:pb-20 px-4 sm:px-6 max-w-lg mx-auto flex flex-col items-center gap-6 sm:gap-8 safe-bottom">
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -109,13 +109,13 @@ const ResultsScreen = ({ score, maxScore, errors, onBack, onRetry }: Props) => {
           </motion.div>
         )}
 
-        <div className="flex gap-4 mt-4">
+        <div className="flex gap-3 mt-4 w-full sm:w-auto">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={onRetry}
-            className="flex items-center gap-2 px-6 py-3 rounded-full border border-border text-foreground
-              hover:border-primary/30 transition-colors text-sm font-medium"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3.5 rounded-full border border-border text-foreground
+              hover:border-primary/30 transition-colors text-sm font-medium active:scale-95"
           >
             <RotateCcw className="w-4 h-4" />
             Újra
@@ -124,11 +124,11 @@ const ResultsScreen = ({ score, maxScore, errors, onBack, onRetry }: Props) => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={onBack}
-            className="flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground rounded-full
-              text-sm font-medium hover:opacity-90 transition-opacity"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-full
+              text-sm font-medium hover:opacity-90 transition-opacity active:scale-95"
           >
             <ArrowLeft className="w-4 h-4" />
-            Vissza a fejezethez
+            Fejezet
           </motion.button>
         </div>
       </div>

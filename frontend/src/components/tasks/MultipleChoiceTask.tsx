@@ -61,7 +61,7 @@ const MultipleChoiceTask = ({ word, onComplete }: Props) => {
       </p>
 
       <div className="flex items-center gap-3">
-        <h2 className="text-4xl font-semibold text-foreground">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-foreground">
           {word.wordDisplay || word.word}
         </h2>
         <motion.button
@@ -80,7 +80,7 @@ const MultipleChoiceTask = ({ word, onComplete }: Props) => {
         </p>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg px-1">
         {options.map((option) => {
           const isCorrect = option === word.hungarian;
           const isSelected = selected === option;

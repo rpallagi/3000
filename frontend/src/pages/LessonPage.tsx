@@ -116,11 +116,11 @@ const LessonPage = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -30 }}
             transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-            className="w-full bg-card rounded-[32px] border border-border p-8 md:p-12 flex flex-col items-center gap-6"
+            className="w-full bg-card rounded-[24px] sm:rounded-[32px] border border-border p-6 sm:p-8 md:p-12 flex flex-col items-center gap-5 sm:gap-6"
             style={{ boxShadow: "var(--card-shadow)" }}
           >
             <div className="flex items-center gap-3">
-              <h2 className="text-4xl md:text-5xl font-semibold text-foreground">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground">
                 {word.wordDisplay || word.word}
               </h2>
               <motion.button
@@ -178,15 +178,15 @@ const LessonPage = () => {
           </motion.div>
         </AnimatePresence>
 
-        <div className="flex items-center gap-4 mt-10">
+        <div className="flex items-center gap-3 mt-8 sm:mt-10 w-full sm:w-auto sm:justify-center">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handlePrev}
             disabled={currentIndex === 0}
-            className="px-6 py-3 rounded-full text-sm font-medium border border-border text-muted-foreground
+            className="flex-1 sm:flex-none px-6 py-3.5 rounded-full text-sm font-medium border border-border text-muted-foreground
               hover:text-foreground hover:border-foreground/20 transition-colors
-              disabled:opacity-30 disabled:cursor-not-allowed"
+              disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
           >
             Előző
           </motion.button>
@@ -194,8 +194,8 @@ const LessonPage = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleNext}
-            className="px-8 py-3 bg-primary text-primary-foreground rounded-full text-sm font-medium
-              hover:opacity-90 transition-opacity flex items-center gap-2"
+            className="flex-1 sm:flex-none px-8 py-3.5 bg-primary text-primary-foreground rounded-full text-sm font-medium
+              hover:opacity-90 transition-opacity flex items-center justify-center gap-2 active:scale-95"
           >
             {isLast ? "Gyakorlás" : "Következő"}
             <ArrowRight className="w-4 h-4" />

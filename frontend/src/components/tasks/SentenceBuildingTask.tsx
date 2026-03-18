@@ -75,7 +75,7 @@ const SentenceBuildingTask = ({ word, onComplete }: Props) => {
         Rakd össze az angol mondatot a magyar jelentés alapján.
       </p>
 
-      <h2 className="text-2xl md:text-3xl font-semibold text-foreground text-center leading-snug">
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground text-center leading-snug px-2">
         {sentence.hu}
       </h2>
 
