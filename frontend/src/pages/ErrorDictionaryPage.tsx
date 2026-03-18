@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, BookOpen, Volume2, RotateCcw, Target } from "lucide-react";
 import Header from "@/components/Header";
 import { getErrorWords } from "@/utils/progress";
-import { fetchLevels, WordData } from "@/utils/api";
 import { speak } from "@/utils/tts";
 import { isSilent } from "@/utils/settings";
 
@@ -31,45 +30,34 @@ const ErrorDictionaryPage = () => {
 
   const loadErrorWords = async () => {
     const errorDict = getErrorWords();
-    const errorIds = Object.entries(errorDict)
-      .sort(([, a], [, b]) => b - a) // Sort by error count descending
-      .slice(0, 30); // Top 30 weak words
+    const entries = Object.entries(errorDict)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 30);
 
-    if (errorIds.length === 0) {
+    if (entries.length === 0) {
       setLoading(false);
       return;
     }
 
     try {
-      const levels = await fetchLevels();
-      const allWords: ErrorWord[] = [];
+      const ids = entries.map(([id]) => Number(id));
+      const res = await fetch("/api/words/by-ids", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      if (!res.ok) throw new Error("Failed to fetch words");
+      const words = await res.json();
 
-      // Fetch chapters to find word details
-      for (const level of levels) {
-        for (const chapter of level.chapters) {
-          try {
-            const res = await fetch(`/api/chapters/${chapter.id}`);
-            if (!res.ok) continue;
-            const chapterData = await res.json();
+      const allWords: ErrorWord[] = words.map((w: any) => ({
+        wordId: w.id,
+        word: w.word,
+        hungarian: w.hungarian,
+        errorCount: errorDict[w.id] || 0,
+        chapterId: w.chapterId,
+        chapterName: w.chapterName,
+      }));
 
-            for (const word of chapterData.words) {
-              const errorEntry = errorDict[word.id];
-              if (errorEntry) {
-                allWords.push({
-                  wordId: word.id,
-                  word: word.word,
-                  hungarian: word.hungarian,
-                  errorCount: errorEntry,
-                  chapterId: chapter.id,
-                  chapterName: chapter.nameEn || chapter.name,
-                });
-              }
-            }
-          } catch {}
-        }
-      }
-
-      // Sort by error count
       allWords.sort((a, b) => b.errorCount - a.errorCount);
       setErrorWords(allWords);
     } catch {}

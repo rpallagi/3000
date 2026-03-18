@@ -140,6 +140,28 @@ def register_data_routes(app):
         dialogues = [d for d in data.get('dialogues', []) if d.get('chapterId') == chapter_id]
         return jsonify(dialogues)
 
+    @app.route('/api/words/by-ids', methods=['POST'])
+    def get_words_by_ids():
+        """Return words by their IDs — used by error dictionary."""
+        req = request.get_json()
+        if not req or 'ids' not in req:
+            return jsonify({"error": "Missing ids"}), 400
+
+        word_ids = set(req['ids'][:50])  # Max 50
+        data = load_data()
+        results = []
+        for ch in data['chapters']:
+            for w in ch['words']:
+                if w['id'] in word_ids:
+                    results.append({
+                        "id": w["id"],
+                        "word": w["word"],
+                        "hungarian": w["hungarian"],
+                        "chapterId": ch["id"],
+                        "chapterName": ch.get("nameEn", ch["name"]),
+                    })
+        return jsonify(results)
+
     @app.route('/api/health', methods=['GET'])
     def health():
         return jsonify({"status": "ok", "totalWords": load_data()['meta']['totalWords']})
