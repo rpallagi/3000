@@ -184,6 +184,26 @@ def _login_or_register(provider, provider_id, email, name, avatar_url):
     })
 
 
+@oauth_bp.route('/dev-login', methods=['POST'])
+def dev_login():
+    """Quick test login — no password, no OAuth. Remove in production!"""
+    import os
+    if os.environ.get('SECRET_KEY', '').startswith('dev-') or not os.environ.get('GOOGLE_CLIENT_ID'):
+        # Only available when OAuth is not configured (dev mode)
+        data = request.get_json() or {}
+        name = data.get('name', 'Teszt Felhasználó')
+        email = data.get('email', 'teszt@playeng.hu')
+
+        return _login_or_register(
+            provider='dev',
+            provider_id=f'dev-{email}',
+            email=email,
+            name=name,
+            avatar_url=None,
+        )
+    return jsonify({'error': 'Dev login disabled in production'}), 403
+
+
 @oauth_bp.route('/refresh', methods=['POST'])
 def refresh():
     """Exchange refresh token for new access token."""

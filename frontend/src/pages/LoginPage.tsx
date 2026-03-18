@@ -142,6 +142,43 @@ const LoginPage = () => {
             </button>
           </div>
 
+          {/* Dev/Test login — visible until OAuth is configured */}
+          <div className="mt-6 pt-6 border-t border-border">
+            <button
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/auth/dev-login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: "Roland", email: "roland@playeng.hu" }),
+                  });
+                  if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem("playeng_access_token", data.accessToken);
+                    localStorage.setItem("playeng_refresh_token", data.refreshToken);
+                    window.location.href = "/";
+                  } else {
+                    const err = await res.json();
+                    alert(err.error || "Dev login nem elérhető");
+                  }
+                } catch {
+                  alert("Szerver nem elérhető");
+                }
+              }}
+              className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-card border border-dashed border-border rounded-2xl text-muted-foreground font-medium hover:bg-accent hover:text-foreground transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                <polyline points="10 17 15 12 10 7"/>
+                <line x1="15" x2="3" y1="12" y2="12"/>
+              </svg>
+              Teszt belépés (jelszó nélkül)
+            </button>
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Ez a gomb eltűnik, ha az OAuth be van állítva.
+            </p>
+          </div>
+
           <p className="text-xs text-muted-foreground text-center mt-8 leading-relaxed">
             A bejelentkezéssel elfogadod a{" "}
             <span className="underline">felhasználási feltételeket</span> és az{" "}
