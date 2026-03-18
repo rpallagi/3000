@@ -52,18 +52,19 @@ Deploy `angolozzunk.hu` as a subscription-based English learning platform with s
 | R6 | Apple Sign-In beállítás | ALACSONY | 20 perc |
 | R7 | SimplePay merchant regisztráció | ALACSONY | 30 perc |
 
-### FEJLESZTÉS HÁTRAVAN
+### FEJLESZTÉS
 
-| # | Feature | Prioritás | Komplexitás |
-|---|---------|-----------|-------------|
-| F1 | **Fejezet teszt** (chapter test) — záró teszt +50 pont | KÖZEPES | Kis |
-| F2 | **Progress sync szerverre** — localStorage → PostgreSQL | KÖZEPES | Közepes |
-| F3 | **Gyenge szavak célzott gyakorlás** — Hibaszótárból task indítás | KÖZEPES | Közepes |
-| F4 | **Streak vizualizáció** — naptár, badge, motivációs üzenetek | ALACSONY | Kis |
-| F5 | **AI Tutor chat UI javítás** — beszéd + válasz, chapter context | ALACSONY | Közepes |
-| F6 | **PWA telepítés** — manifest, service worker, offline cache | ALACSONY | Közepes |
-| F7 | **Analitika** — Plausible (GDPR-kompatibilis) | ALACSONY | Kis |
-| F8 | **ÁSZF + Adatvédelem** oldalak | ALACSONY | Kis |
+| # | Feature | Státusz | Megjegyzés |
+|---|---------|---------|------------|
+| F1 | **Fejezet teszt** (chapter test) — záró teszt +50 pont | KÉSZ | 10 random szó, lessonId=0, chapter page-en jelenik meg |
+| F2 | **Progress sync szerverre** — localStorage → PostgreSQL | KÉSZ | saveLessonResult() auto-sync, syncProgressFromServer() merge |
+| F3 | **Gyenge szavak célzott gyakorlás** — Hibaszótárból task indítás | KÉSZ | /weak-words-practice — teljes PlayENG flow (choice+sentence+pronunciation) |
+| F4 | **Streak vizualizáció** — naptár, badge, motivációs üzenetek | KÉSZ | Főoldalon 7 napos naptár + motivációs üzenetek (1-30+ nap) |
+| F5 | **AI Tutor chat UI javítás** — beszéd + válasz, chapter context | HÁTRAVAN | |
+| F6 | **PWA telepítés** — manifest, service worker, offline cache | HÁTRAVAN | |
+| F7 | **Analitika** — Plausible (GDPR-kompatibilis) | HÁTRAVAN | |
+| F8 | **ÁSZF + Adatvédelem** oldalak | KÉSZ | /terms + /privacy — GDPR, footer linkek |
+| F9 | **Szóspecifikus magyar kiejtési tippek** | HÁTRAVAN | PronunciationTask-ban van hardcoded tipp, de szóspecifikus nincs |
 
 ---
 
