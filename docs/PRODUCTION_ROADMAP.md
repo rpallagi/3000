@@ -7,6 +7,63 @@ Deploy `angolozzunk.hu` as a subscription-based English learning platform with s
 **Server:** Unraid (192.168.8.235)
 **Domain:** angolozzunk.hu
 **Tunnel:** Cloudflare Tunnel (free SSL, DDoS protection)
+**Utolsó frissítés:** 2026-03-18
+
+---
+
+## Állapot összefoglaló
+
+### KÉSZ (Implementálva)
+
+| # | Feature | Státusz | Megjegyzés |
+|---|---------|---------|------------|
+| 1 | **Frontend (React + Vite + Tailwind)** | KÉSZ | Mobil-első design, Apple-stílusú kártyák |
+| 2 | **Backend (Flask + PostgreSQL)** | KÉSZ | API-k, modellek, blueprintek mind megvannak |
+| 3 | **Docker Compose (3 szolgáltatás)** | KÉSZ | db + backend + frontend, port 5008 |
+| 4 | **Oxford 3000 adatbázis** | KÉSZ | 973 szó, 23 fejezet, 6 szint, 31 párbeszéd |
+| 5 | **Step 0: Megfigyelés** | KÉSZ | Kötelező meghallgatás, auto-play, lock gomb |
+| 6 | **1. feladat: Választós (Cloze)** | KÉSZ | Mondat + hiányzó szó, 4 opció, 30mp hint, 5/2/1/0 pont |
+| 7 | **2. feladat: Mondatépítés** | KÉSZ | Drag-drop + distractorok, 8/5/3/1 pont |
+| 8 | **3. feladat: Kiejtés** | KÉSZ | Kötelező listen-first, magyar tippek (30+), mic lock, 8/5/3/1 pont |
+| 9 | **4. feladat: Párbeszéd** | KÉSZ | Rangsorolt válaszok, magyarázatok, 8/5/3/0 pont |
+| 10 | **Eredmény-képernyő** | KÉSZ | Százalék, progress ring, gyenge szavak |
+| 11 | **Hibaszótár** | KÉSZ | /error-dictionary oldal, flashcard gyakorlás |
+| 12 | **Napi kihívás** | KÉSZ | 30mp mondatfordítás, +15 pont, streak |
+| 13 | **Hang/Néma mód** | KÉSZ | Header toggle, néma módban kiejtés kihagyva |
+| 14 | **Sötét mód** | KÉSZ | Header toggle |
+| 15 | **AI visszajelzés (lecke végén)** | KÉSZ | Claude Haiku, személyes magyar feedback |
+| 16 | **Progress tracking (helyi)** | KÉSZ | localStorage, streak, error dict |
+| 17 | **OAuth kód (Google/Facebook/Apple)** | KÉSZ | Kód megvan, kulcsok kellenek (Roland) |
+| 18 | **WebAuthn kód (Face ID)** | KÉSZ | Kód megvan, config kell |
+| 19 | **SimplePay kód (fizetés)** | KÉSZ | Kód megvan, merchant reg kell |
+| 20 | **AI Tutor kód (chat)** | KÉSZ | Kód megvan, API key kell |
+| 21 | **Security middleware** | KÉSZ | Rate limiting, CORS, CSP, Talisman |
+| 22 | **Dev-login (teszt)** | KÉSZ | /api/auth/dev-login, OAuth nélkül is működik |
+
+### ROLAND FELADATA (külső beállítások)
+
+| # | Feladat | Prioritás | Idő |
+|---|---------|-----------|-----|
+| R1 | `.env` fájl létrehozása az Unraid-en | KRITIKUS | 10 perc |
+| R2 | Google OAuth Client ID + Secret | MAGAS | 15 perc |
+| R3 | Cloudflare Tunnel beállítás (angolozzunk.hu) | MAGAS | 30 perc |
+| R4 | Claude API kulcs (console.anthropic.com) | KÖZEPES | 5 perc |
+| R5 | Facebook App ID + Secret | ALACSONY | 15 perc |
+| R6 | Apple Sign-In beállítás | ALACSONY | 20 perc |
+| R7 | SimplePay merchant regisztráció | ALACSONY | 30 perc |
+
+### FEJLESZTÉS HÁTRAVAN
+
+| # | Feature | Prioritás | Komplexitás |
+|---|---------|-----------|-------------|
+| F1 | **Fejezet teszt** (chapter test) — záró teszt +50 pont | KÖZEPES | Kis |
+| F2 | **Progress sync szerverre** — localStorage → PostgreSQL | KÖZEPES | Közepes |
+| F3 | **Gyenge szavak célzott gyakorlás** — Hibaszótárból task indítás | KÖZEPES | Közepes |
+| F4 | **Streak vizualizáció** — naptár, badge, motivációs üzenetek | ALACSONY | Kis |
+| F5 | **AI Tutor chat UI javítás** — beszéd + válasz, chapter context | ALACSONY | Közepes |
+| F6 | **PWA telepítés** — manifest, service worker, offline cache | ALACSONY | Közepes |
+| F7 | **Analitika** — Plausible (GDPR-kompatibilis) | ALACSONY | Kis |
+| F8 | **ÁSZF + Adatvédelem** oldalak | ALACSONY | Kis |
 
 ---
 
@@ -28,21 +85,54 @@ Deploy `angolozzunk.hu` as a subscription-based English learning platform with s
          (static)     ┌─────┴──────┐
                       │            │
                  PostgreSQL   Claude API
-                 (users,      (AI tutor)
-                 progress,
+                 (users,      (AI tutor +
+                 progress,    feedback)
                  billing)
 ```
 
 ---
 
-## Phase 1: Database & Security Foundation
+## PlayENG módszertan (implementált)
 
-### PostgreSQL
+### Lecke folyamat
+```
+Step 0: Megfigyelés (kötelező meghallgatás)     ← KÉSZ
+  ↓
+Step 1: Választós (cloze — mondat + hiányzó szó)  ← KÉSZ
+  ↓
+Step 2: Mondatépítés (drag-drop + distractorok)   ← KÉSZ
+  ↓
+Step 3: Kiejtés (listen-first + magyar tippek)     ← KÉSZ
+  ↓
+Step 4: Párbeszéd (rangsorolt válaszok)            ← KÉSZ
+  ↓
+Eredmények (AI feedback + gyenge szavak)           ← KÉSZ
+  ↓
+Hibaszótár (visszahozza ami nehéz)                 ← KÉSZ
+  ↓
+Napi kihívás (30mp, +15 pont)                      ← KÉSZ
+```
+
+### Pontozás
+| Feladat | Alap pont | Max bónusz |
+|---------|-----------|------------|
+| Választós (cloze) | +5 | +10 (sorozat) |
+| Mondatépítés | +8 | +10 (sorozat) |
+| Kiejtés | +8 | +10 (sorozat) |
+| Párbeszéd | +8/sor | +15 (mind tökéletes) |
+| Napi kihívás | +15 | — |
+| Fejezet teszt | +50 | — |
+
+---
+
+## Phase 1: Database & Security Foundation — KÉSZ
+
+### PostgreSQL — KÉSZ
 - Docker Compose service alongside backend + frontend
 - SQLAlchemy ORM + Flask-Migrate for schema management
 - Tables: users, subscriptions, progress, sessions
 
-### Security Middleware
+### Security Middleware — KÉSZ
 | Protection | Tool | Purpose |
 |------------|------|---------|
 | Rate limiting | Flask-Limiter | 60 req/min per IP |
@@ -55,31 +145,26 @@ Deploy `angolozzunk.hu` as a subscription-based English learning platform with s
 
 ---
 
-## Phase 2: Authentication
+## Phase 2: Authentication — KÓD KÉSZ, CONFIG KELL
 
 ### Social Login (OAuth 2.0)
-| Provider | What user sees |
-|----------|---------------|
-| Google | "Sign in with Google" button |
-| Facebook | "Continue with Facebook" button |
-| Apple | "Sign in with Apple" button |
+| Provider | What user sees | Státusz |
+|----------|---------------|---------|
+| Google | "Sign in with Google" button | Kód kész, kulcs kell (R2) |
+| Facebook | "Continue with Facebook" button | Kód kész, kulcs kell (R5) |
+| Apple | "Sign in with Apple" button | Kód kész, kulcs kell (R6) |
 
-**Library:** Authlib (Python OAuth client)
+### Dev-login — KÉSZ
+- Teszt belépés OAuth nélkül: `/api/auth/dev-login`
+- Automatikusan elérhető ha nincs Google OAuth config
 
-### 2FA (Two-Factor Authentication)
-- TOTP via `pyotp` — Google Authenticator / Authy compatible
-- QR code setup flow
-- Optional SMS fallback (Twilio)
-
-### Biometric "Remember Me" (WebAuthn / Passkeys)
+### Biometric "Remember Me" (WebAuthn) — KÓD KÉSZ
 - Touch ID / Face ID via browser WebAuthn API
-- `py_webauthn` (backend) + `@simplewebauthn/browser` (frontend)
-- User logs in once → enables biometric → auto-login on return
-- No password needed, no daily login friction
+- `webauthn` (backend) + frontend integration
 
 ---
 
-## Phase 3: Subscription & Billing
+## Phase 3: Subscription & Billing — KÓD KÉSZ, REG KELL
 
 ### OTP SimplePay (Hungarian payment gateway)
 
@@ -88,129 +173,25 @@ Deploy `angolozzunk.hu` as a subscription-based English learning platform with s
 | Free (Ingyenes) | Level 1 — Chapters 1-4 | 0 Ft |
 | Premium (Prémium) | All 6 levels + AI tutor | ~2,990 Ft/hó |
 
-**Flow:**
-1. User hits Level 2 → "Upgrade to Premium" screen
-2. Redirected to SimplePay checkout → pays with card
-3. SimplePay IPN (callback) → backend marks user as premium
-4. User returns → full access unlocked
+---
 
-**Integration:**
-- SimplePay PHP/Python SDK
-- IPN (Instant Payment Notification) webhook
-- Recurring payments for monthly subscription
-- Store subscription_status on user record
+## Phase 4: AI Integration — RÉSZBEN KÉSZ
+
+| Feature | Státusz |
+|---------|---------|
+| AI Tutor chat (Claude Haiku) | Kód kész, API key kell (R4) |
+| AI lecke-feedback (eredmény után) | KÉSZ (backend + frontend) |
+| AI kiejtés-feedback | Kód kész, API key kell |
 
 ---
 
-## Phase 4: AI Voice Tutor
-
-### Web Speech API + Claude API
-
-| Component | Tech |
-|-----------|------|
-| Listen to user | Web Speech API (SpeechRecognition) |
-| Understand & respond | Claude API (Haiku — fast + cheap) |
-| Speak back | Web Speech API (SpeechSynthesis) |
-
-**How it works:**
-1. User taps mic → Speech-to-Text captures what they say
-2. Send transcription to backend → Claude API
-3. Claude responds as English tutor (corrects grammar, suggests better words)
-4. TTS reads Claude's response back
-5. Conversation continues naturally
-
-**Tutor persona:**
-- Friendly, encouraging tone
-- Knows the student's current chapter vocabulary
-- Corrects gently, explains in simple English
-- Can switch to Hungarian for explanations if needed
-- Keeps responses short (1-2 sentences)
-
-**Cost:** ~$0.01-0.05 per tutoring session (Claude Haiku)
-
----
-
-## Phase 5: Cloudflare Tunnel + Domain
+## Phase 5: Cloudflare Tunnel + Domain — ROLAND FELADATA (R3)
 
 ### Setup on Unraid
 ```bash
-# Install cloudflared (if not already)
-# Create tunnel
 cloudflared tunnel create playeng
-
-# Configure tunnel
-cat > /root/.cloudflared/config.yml << 'EOF'
-tunnel: <tunnel-id>
-credentials-file: /root/.cloudflared/<tunnel-id>.json
-
-ingress:
-  - hostname: angolozzunk.hu
-    service: http://localhost:5008
-  - hostname: www.angolozzunk.hu
-    service: http://localhost:5008
-  - service: http_status:404
-EOF
-
-# Run as service
+# Configure tunnel for angolozzunk.hu → localhost:5008
 cloudflared service install
-```
-
-### Cloudflare DNS
-```
-CNAME  angolozzunk.hu      → <tunnel-id>.cfargotunnel.com
-CNAME  www.angolozzunk.hu  → <tunnel-id>.cfargotunnel.com
-```
-
-**Benefits:** Free SSL, DDoS protection, CDN caching, no ports exposed.
-
----
-
-## Updated Docker Compose
-
-```yaml
-version: "3.8"
-services:
-  db:
-    image: postgres:16-alpine
-    container_name: playeng-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: playeng
-      POSTGRES_USER: playeng
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    expose:
-      - "5432"
-
-  backend:
-    build: ./backend
-    container_name: playeng-backend
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://playeng:${DB_PASSWORD}@db:5432/playeng
-      SECRET_KEY: ${SECRET_KEY}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      SIMPLEPAY_MERCHANT_ID: ${SIMPLEPAY_MERCHANT_ID}
-      SIMPLEPAY_SECRET_KEY: ${SIMPLEPAY_SECRET_KEY}
-      CLAUDE_API_KEY: ${CLAUDE_API_KEY}
-    depends_on:
-      - db
-    expose:
-      - "5000"
-
-  frontend:
-    build: ./frontend
-    container_name: playeng-frontend
-    restart: unless-stopped
-    ports:
-      - "5008:80"
-    depends_on:
-      - backend
-
-volumes:
-  pgdata:
 ```
 
 ---
@@ -241,26 +222,9 @@ APPLE_KEY_ID=<from-apple-developer>
 SIMPLEPAY_MERCHANT_ID=<from-simplepay>
 SIMPLEPAY_SECRET_KEY=<from-simplepay>
 
-# Claude API (AI Tutor)
+# Claude API (AI Tutor + Feedback)
 CLAUDE_API_KEY=<from-console.anthropic.com>
 ```
-
----
-
-## Implementation Order
-
-| # | Phase | What |
-|---|-------|------|
-| 1 | Database | PostgreSQL + SQLAlchemy + user model |
-| 2 | Security | Rate limiting, CORS, headers, validation |
-| 3 | Google Login | OAuth 2.0 + JWT sessions |
-| 4 | WebAuthn | Biometric remember me |
-| 5 | Cloudflare Tunnel | angolozzunk.hu live |
-| 6 | SimplePay | Subscription billing |
-| 7 | Facebook + Apple login | Additional providers |
-| 8 | 2FA | TOTP optional security |
-| 9 | AI Voice Tutor | Claude-powered conversation |
-| 10 | Progress sync | Server-side progress storage |
 
 ---
 
