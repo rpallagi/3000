@@ -3,18 +3,27 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
-import { fetchLesson, LessonData, WordData } from "@/utils/api";
+import { fetchLesson, fetchDialogues, LessonData, WordData } from "@/utils/api";
 import { saveLessonResult } from "@/utils/progress";
 import MultipleChoiceTask from "@/components/tasks/MultipleChoiceTask";
 import SentenceBuildingTask from "@/components/tasks/SentenceBuildingTask";
 import PronunciationTask from "@/components/tasks/PronunciationTask";
+import DialogueTask, { parseDialogueTurns } from "@/components/tasks/DialogueTask";
 import ResultsScreen from "@/components/tasks/ResultsScreen";
 
-type TaskType = "choice" | "sentence" | "pronunciation";
+// PlayENG method: per-word cycle, not per-type
+// Word 1: choice → sentence → pronunciation
+// Word 2: choice → sentence → pronunciation
+// ...
+// Then: Dialogue (if available for chapter)
+// Then: Results
+
+type TaskType = "choice" | "sentence" | "pronunciation" | "dialogue";
 
 interface TaskItem {
   type: TaskType;
-  word: WordData;
+  word?: WordData;
+  dialogue?: any;
 }
 
 const PracticePage = () => {
@@ -30,32 +39,49 @@ const PracticePage = () => {
 
   useEffect(() => {
     if (!chapterId || !lessonId) return;
-    fetchLesson(Number(chapterId), Number(lessonId))
-      .then((data) => {
-        setLesson(data);
-        // Build task sequence: choice -> sentence -> pronunciation for each word
-        const taskList: TaskItem[] = [];
-        for (const word of data.words) {
-          taskList.push({ type: "choice", word });
+
+    Promise.all([
+      fetchLesson(Number(chapterId), Number(lessonId)),
+      fetchDialogues(Number(chapterId)).catch(() => []),
+    ]).then(([lessonData, dialogues]) => {
+      setLesson(lessonData);
+
+      // Build task sequence: PER WORD (PlayENG method)
+      // Each word gets: choice → sentence building → pronunciation
+      const taskList: TaskItem[] = [];
+      for (const word of lessonData.words) {
+        // 1. Multiple choice (mi a jelentése?)
+        taskList.push({ type: "choice", word });
+
+        // 2. Sentence building (only if sentence available)
+        if (word.sentences?.[0]) {
+          taskList.push({ type: "sentence", word });
         }
-        for (const word of data.words) {
-          if (word.sentences?.[0]) {
-            taskList.push({ type: "sentence", word });
-          }
-        }
-        for (const word of data.words) {
-          taskList.push({ type: "pronunciation", word });
-        }
-        setTasks(taskList);
-      })
-      .finally(() => setLoading(false));
+
+        // 3. Pronunciation (mondd ki)
+        taskList.push({ type: "pronunciation", word });
+      }
+
+      // 4. Dialogue at the end (if available for this chapter)
+      // Only add dialogue for first lesson of a chapter
+      if (Number(lessonId) === 1 && dialogues.length > 0) {
+        const dialogue = dialogues[0];
+        const parsedTurns = parseDialogueTurns(dialogue.turns);
+        taskList.push({
+          type: "dialogue",
+          dialogue: { id: dialogue.id, turns: parsedTurns },
+        });
+      }
+
+      setTasks(taskList);
+    }).finally(() => setLoading(false));
   }, [chapterId, lessonId]);
 
   const handleTaskComplete = useCallback(
     (score: number, isError: boolean) => {
       setScores((prev) => [...prev, score]);
-      if (isError && tasks[currentTaskIndex]) {
-        const w = tasks[currentTaskIndex].word;
+      if (isError && tasks[currentTaskIndex]?.word) {
+        const w = tasks[currentTaskIndex].word!;
         setErrors((prev) => [...prev, { wordId: w.id, word: w.word }]);
       }
 
@@ -68,10 +94,22 @@ const PracticePage = () => {
     [currentTaskIndex, tasks]
   );
 
+  const handleDialogueComplete = useCallback(
+    (dialogueScore: number) => {
+      setScores((prev) => [...prev, dialogueScore]);
+      if (currentTaskIndex < tasks.length - 1) {
+        setCurrentTaskIndex((i) => i + 1);
+      } else {
+        setShowResults(true);
+      }
+    },
+    [currentTaskIndex, tasks]
+  );
+
   useEffect(() => {
     if (showResults && lesson) {
       const totalScore = scores.reduce((a, b) => a + b, 0);
-      const maxPossible = tasks.length * 8; // max per task
+      const maxPossible = tasks.length * 8;
       saveLessonResult({
         chapterId: Number(chapterId),
         lessonId: Number(lessonId),
@@ -130,6 +168,14 @@ const PracticePage = () => {
   const task = tasks[currentTaskIndex];
   const progress = ((currentTaskIndex + 1) / tasks.length) * 100;
 
+  // Figure out which word we're on and what step
+  const currentWord = task.word;
+  const taskTypeLabel =
+    task.type === "choice" ? "Válassz" :
+    task.type === "sentence" ? "Építs mondatot" :
+    task.type === "pronunciation" ? "Mondd ki" :
+    "Párbeszéd";
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -144,9 +190,14 @@ const PracticePage = () => {
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">Kilépés</span>
           </motion.button>
-          <span className="text-sm text-muted-foreground">
-            {currentTaskIndex + 1} / {tasks.length}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-medium text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
+              {taskTypeLabel}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {currentTaskIndex + 1} / {tasks.length}
+            </span>
+          </div>
         </div>
 
         {/* Progress bar */}
@@ -167,14 +218,17 @@ const PracticePage = () => {
             transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
             className="w-full"
           >
-            {task.type === "choice" && (
+            {task.type === "choice" && task.word && (
               <MultipleChoiceTask word={task.word} onComplete={handleTaskComplete} />
             )}
-            {task.type === "sentence" && (
+            {task.type === "sentence" && task.word && (
               <SentenceBuildingTask word={task.word} onComplete={handleTaskComplete} />
             )}
-            {task.type === "pronunciation" && (
+            {task.type === "pronunciation" && task.word && (
               <PronunciationTask word={task.word} onComplete={handleTaskComplete} />
+            )}
+            {task.type === "dialogue" && task.dialogue && (
+              <DialogueTask dialogue={task.dialogue} onComplete={handleDialogueComplete} />
             )}
           </motion.div>
         </AnimatePresence>

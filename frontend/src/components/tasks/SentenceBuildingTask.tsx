@@ -69,7 +69,10 @@ const SentenceBuildingTask = ({ word, onComplete }: Props) => {
   return (
     <div className="flex flex-col items-center gap-8 w-full">
       <p className="text-sm text-muted-foreground tracking-widest uppercase font-medium">
-        Fordítsd le
+        Mondatépítés
+      </p>
+      <p className="text-xs text-muted-foreground -mt-4">
+        Rakd össze az angol mondatot a magyar jelentés alapján.
       </p>
 
       <h2 className="text-2xl md:text-3xl font-semibold text-foreground text-center leading-snug">

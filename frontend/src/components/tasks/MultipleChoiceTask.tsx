@@ -54,7 +54,10 @@ const MultipleChoiceTask = ({ word, onComplete }: Props) => {
   return (
     <div className="flex flex-col items-center gap-8 w-full">
       <p className="text-sm text-muted-foreground tracking-widest uppercase font-medium">
-        Mi a jelentése?
+        Felismerés
+      </p>
+      <p className="text-xs text-muted-foreground -mt-4">
+        Hallgasd meg a szót, és válaszd ki a helyes magyar jelentését.
       </p>
 
       <div className="flex items-center gap-3">

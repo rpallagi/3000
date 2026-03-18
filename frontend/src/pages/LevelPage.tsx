@@ -6,6 +6,33 @@ import Header from "@/components/Header";
 import { fetchLevels, LevelData } from "@/utils/api";
 import { getChapterProgress } from "@/utils/progress";
 
+const LEVEL_INFO: Record<number, { motivation: string; method: string }> = {
+  1: {
+    motivation: "Az alapok, amelyek nélkül nem megy semmi. Köszönés, bemutatkozás, számok, színek.",
+    method: "Hallgasd, értsd, mondd ki. Minden szót mondatban tanulsz, nem önmagában.",
+  },
+  2: {
+    motivation: "A mindennapok szavai: család, étel, ruha, otthon. Amit nap mint nap használsz.",
+    method: "Már tudod az alapokat - most építesz rá. Témánként haladunk, ahogy a valós életben is.",
+  },
+  3: {
+    motivation: "A világ körülötted: idő, iskola, helyek, utazás, természet. Így mesélsz a világodról.",
+    method: "Hosszabb mondatokat építesz, a szókincsed elég széles lesz egy turista beszélgetéshez.",
+  },
+  4: {
+    motivation: "Érzelmek, szabadidő, foglalkozások. Nem csak tényeket mondasz, hanem véleményt is.",
+    method: "A párbeszédek fontosabbá válnak - élő helyzetekben gyakorolsz.",
+  },
+  5: {
+    motivation: "Munka, technológia, és az igék világa. A mondataid összetettebbek, természetesebbek lesznek.",
+    method: "93 ige egy helyen - ezek a mondatépítés építőkövei. Aki az igéket tudja, az beszél.",
+  },
+  6: {
+    motivation: "Melléknevek, határozószók, szókapcsolatok. A magabiztos, folyékony beszéd szintje.",
+    method: "Nem szavakat tanulsz, hanem kifejezéseket. Így beszél egy anyanyelvi.",
+  },
+};
+
 const LevelPage = () => {
   const { levelId } = useParams<{ levelId: string }>();
   const navigate = useNavigate();
@@ -74,6 +101,16 @@ const LevelPage = () => {
           <p className="text-sm text-muted-foreground mt-2">
             {level.chapterCount} fejezet · {level.wordCount} szó
           </p>
+          {LEVEL_INFO[level.id] && (
+            <div className="mt-4 p-5 bg-primary/5 rounded-2xl flex flex-col gap-2">
+              <p className="text-base text-foreground leading-relaxed">
+                {LEVEL_INFO[level.id].motivation}
+              </p>
+              <p className="text-sm text-primary font-medium">
+                {LEVEL_INFO[level.id].method}
+              </p>
+            </div>
+          )}
         </motion.div>
 
         <div className="flex flex-col gap-4">

@@ -89,7 +89,10 @@ const PronunciationTask = ({ word, onComplete }: Props) => {
   return (
     <div className="flex flex-col items-center gap-8 w-full">
       <p className="text-sm text-muted-foreground tracking-widest uppercase font-medium">
-        Mondd ki
+        Kiejtés
+      </p>
+      <p className="text-xs text-muted-foreground -mt-4">
+        Hallgasd meg, aztán mondd ki hangosan. A telefonod értékeli a kiejtésed.
       </p>
 
       <div className="flex items-center gap-3">
