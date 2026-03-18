@@ -7,3 +7,4 @@ __pycache__/
 .DS_Store
 frontend/dist/
 backend/instance/
+plan.md
