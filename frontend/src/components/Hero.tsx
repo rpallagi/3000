@@ -18,8 +18,8 @@ const Hero = () => (
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="mt-3 sm:mt-4 px-8 py-4 bg-primary text-primary-foreground rounded-full text-lg font-medium
-          hover:opacity-90 transition-opacity active:scale-95"
+        className="mt-3 sm:mt-4 px-8 py-4 playeng-gradient text-white rounded-full text-lg font-medium
+          hover:opacity-90 transition-opacity active:scale-95 shadow-lg"
       >
         Ingyenes próba
       </motion.button>

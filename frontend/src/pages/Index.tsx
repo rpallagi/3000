@@ -122,7 +122,7 @@ const Index = () => {
       <footer className="w-full py-12 px-6 border-t border-border">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
-            © 2026 Play<span className="text-foreground font-medium">ENG</span>
+            © 2026 <span className="text-primary">Play</span><span className="text-foreground font-bold">ENG</span>
           </span>
           <span className="text-sm text-muted-foreground">
             Oxford 3000 alapú mondatépítő platform

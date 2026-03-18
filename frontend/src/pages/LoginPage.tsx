@@ -97,7 +97,7 @@ const LoginPage = () => {
         >
           <div className="text-center mb-10">
             <h1 className="text-3xl font-semibold text-foreground mb-2">
-              Play<span className="text-primary">ENG</span>
+              <span className="text-primary">Play</span><span className="font-bold">ENG</span>
             </h1>
             <p className="text-muted-foreground">
               Jelentkezz be a tanulás folytatásához

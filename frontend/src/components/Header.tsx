@@ -28,9 +28,10 @@ const Header = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
         <button
           onClick={() => navigate("/")}
-          className="text-lg sm:text-xl font-semibold text-foreground tracking-tight hover:opacity-80 transition-opacity"
+          className="flex items-center gap-1.5 text-lg sm:text-xl font-semibold text-foreground tracking-tight hover:opacity-80 transition-opacity"
         >
-          Play<span className="text-primary">ENG</span>
+          <img src="/owl-logo.svg" alt="" className="w-7 h-7 sm:w-8 sm:h-8" />
+          <span className="text-primary">Play</span><span className="font-bold">ENG</span>
         </button>
         <nav className="flex items-center gap-2 sm:gap-4">
           <button
