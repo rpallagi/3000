@@ -46,3 +46,17 @@ sshpass -p 'Majordomo01' ssh root@192.168.8.235 'cd /tmp/3000 && git pull && doc
 - `backend/data/oxford3000.json` - teljes szóadatbázis
 - `docs/PlayENG APP.docx` - app specifikáció (4 feladattípus részletesen)
 - `scripts/parse_docx.py` - docx -> JSON konverter
+
+## Következő feladat: UI Progress & Navigation javítások
+**Státusz:** TERV KÉSZ, implementálásra vár. Részletek: `plan.md`
+
+### Probléma
+A user nem látja az összesített haladását, és a lecke végén zsákutcába kerül (nincs "Következő" gomb).
+
+### Terv (6 lépés, sorrendben)
+1. **`progress.ts` bővítés** — `getOverallStats()` (össz tanult szó / 973, befejezett leckék), `getLastActivity()` (utolsó befejezetlen fejezet+lecke a smart resume-hoz)
+2. **"Következő lecke" gomb** `ResultsScreen.tsx`-ben — lecke végén továbblépés (next lesson / chapter test / next chapter). Props: `nextUrl`, `nextLabel`. Érintett: `PracticePage.tsx`, `ChapterTestPage.tsx`
+3. **Progress dashboard a főoldalon** (`Index.tsx`) — "X/973 szó tanulva" progress bar + "Folytatás: Chapter X, Lesson Y" smart resume gomb
+4. **Level + Chapter progress barok** — `LevelPage.tsx`: szint összegzés (X/Y szó, X/Y fejezet), `ChapterPage.tsx`: fejezet progress bar (X/Y lecke kész)
+5. **Mobil bottom navigation** — Új `components/BottomNav.tsx` (4 tab: Tanulás, Napi kihívás, Hibaszótár, Profil), integrálás `App.tsx`-be
+6. **Streak javítás** — 0 napnál is mutasson: "Kezdd el a sorozatot ma!"
