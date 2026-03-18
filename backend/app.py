@@ -78,10 +78,15 @@ def get_chapter_lesson(chapter_id, lesson_id):
     lesson_words = words[start:end]
 
     # Add distractors from same chapter (other words)
-    all_chapter_words = [w['word'] for w in words]
+    # English distractors for sentence building
+    all_chapter_words_en = [w['word'] for w in words]
+    # Hungarian distractors for multiple choice
+    all_chapter_words_hu = [w['hungarian'] for w in words]
     for w in lesson_words:
-        others = [x for x in all_chapter_words if x != w['word']]
-        w['distractors'] = random.sample(others, min(3, len(others)))
+        others_en = [x for x in all_chapter_words_en if x != w['word']]
+        others_hu = [x for x in all_chapter_words_hu if x != w['hungarian']]
+        w['distractors'] = random.sample(others_en, min(3, len(others_en)))
+        w['distractorsHu'] = random.sample(others_hu, min(3, len(others_hu)))
 
     return jsonify({
         "chapterId": chapter_id,
