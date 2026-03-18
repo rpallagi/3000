@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth, authHeaders } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import { motion, AnimatePresence } from "framer-motion";
+import { fetchChapter } from "@/utils/api";
+import { speak } from "@/utils/tts";
+import { isSilent } from "@/utils/settings";
 
 interface Message {
   role: "user" | "assistant";
@@ -12,15 +15,18 @@ interface Message {
 const TutorPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const chapterParam = searchParams.get("chapter");
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm your English tutor. Let's practice! Try saying something in English, or ask me anything. 😊",
+      content: "Hi! I'm your English tutor. Let's practice! Try saying something in English, or ask me anything.",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
+  const [chapterWords, setChapterWords] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
@@ -29,6 +35,22 @@ const TutorPage = () => {
       navigate("/login");
     }
   }, [user, navigate]);
+
+  // Load chapter context if provided
+  useEffect(() => {
+    if (chapterParam) {
+      fetchChapter(Number(chapterParam))
+        .then((ch) => {
+          const words = ch.words.map((w) => w.word);
+          setChapterWords(words);
+          setMessages([{
+            role: "assistant",
+            content: `Hi! Let's practice words from "${ch.nameEn}". Try using some of these words: ${words.slice(0, 5).join(", ")}...`,
+          }]);
+        })
+        .catch(() => {});
+    }
+  }, [chapterParam]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,7 +74,7 @@ const TutorPage = () => {
         body: JSON.stringify({
           message: text.trim(),
           history: messages,
-          chapterWords: [],
+          chapterWords,
         }),
       });
 
@@ -82,11 +104,8 @@ const TutorPage = () => {
   };
 
   const speakText = (text: string) => {
-    if ("speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
-      utterance.rate = 0.9;
-      speechSynthesis.speak(utterance);
+    if (!isSilent()) {
+      speak(text);
     }
   };
 

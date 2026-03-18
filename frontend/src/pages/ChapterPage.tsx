@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Play, CheckCircle2, Shield } from "lucide-react";
+import { ArrowLeft, Play, CheckCircle2, Shield, MessageCircle } from "lucide-react";
 import Header from "@/components/Header";
 import { fetchChapter, ChapterDetail } from "@/utils/api";
 import { getLessonResult, getChapterProgress } from "@/utils/progress";
@@ -72,6 +72,16 @@ const ChapterPage = () => {
           <p className="text-sm text-muted-foreground mt-2">
             {chapter.wordCount} szó · {totalLessons} lecke
           </p>
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            onClick={() => navigate(`/tutor?chapter=${chapterId}`)}
+            className="mt-3 self-start flex items-center gap-2 text-sm text-primary hover:underline transition-colors"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Gyakorolj AI Tutorral
+          </motion.button>
         </motion.div>
 
         <div className="flex flex-col gap-4">
