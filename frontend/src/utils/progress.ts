@@ -1,3 +1,5 @@
+import { getAccessToken, authHeaders } from "@/contexts/AuthContext";
+
 const STORAGE_KEY = "playeng_progress";
 
 export interface LessonResult {
@@ -27,22 +29,23 @@ const saveProgress = (data: ProgressData): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 };
 
-export const saveLessonResult = (result: LessonResult): void => {
+/** Sync lesson result to server if logged in, always save locally. */
+export const saveLessonResult = async (result: LessonResult): Promise<void> => {
   const data = loadProgress();
   const key = `${result.chapterId}-${result.lessonId}`;
 
-  // Keep best score
+  // Keep best score locally
   const existing = data.lessons[key];
   if (!existing || result.score > existing.score) {
     data.lessons[key] = result;
   }
 
-  // Update error dictionary
+  // Update error dictionary locally
   for (const err of result.errors) {
     data.errorDict[err.wordId] = (data.errorDict[err.wordId] || 0) + 1;
   }
 
-  // Update streak
+  // Update streak locally
   const today = new Date().toISOString().slice(0, 10);
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
   if (data.streak.lastDate === today) {
@@ -56,6 +59,22 @@ export const saveLessonResult = (result: LessonResult): void => {
   }
 
   saveProgress(data);
+
+  // Sync to server if logged in
+  if (getAccessToken()) {
+    try {
+      await fetch("/api/progress/lesson", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders(),
+        },
+        body: JSON.stringify(result),
+      });
+    } catch {
+      // Offline — local save is fine, will sync later
+    }
+  }
 };
 
 export const getChapterProgress = (chapterId: number): LessonResult[] => {
@@ -80,4 +99,45 @@ export const getStreak = (): number => {
 
 export const getErrorWords = (): Record<number, number> => {
   return loadProgress().errorDict;
+};
+
+/** Fetch server-side progress and merge with local data. */
+export const syncProgressFromServer = async (): Promise<void> => {
+  if (!getAccessToken()) return;
+
+  try {
+    const res = await fetch("/api/progress", {
+      headers: authHeaders(),
+    });
+    if (!res.ok) return;
+
+    const serverData = await res.json();
+    const localData = loadProgress();
+
+    // Merge server lessons with local (keep best score)
+    for (const [key, lesson] of Object.entries(serverData.lessons)) {
+      const serverLesson = lesson as LessonResult;
+      const localLesson = localData.lessons[key];
+      if (!localLesson || serverLesson.score > localLesson.score) {
+        localData.lessons[key] = serverLesson;
+      }
+    }
+
+    // Merge error dict (take max count)
+    for (const err of serverData.errors || []) {
+      const wordId = err.wordId;
+      const serverCount = err.errorCount || 0;
+      const localCount = localData.errorDict[wordId] || 0;
+      localData.errorDict[wordId] = Math.max(serverCount, localCount);
+    }
+
+    // Take server streak if higher
+    if (serverData.streak && serverData.streak.currentStreak > localData.streak.count) {
+      localData.streak.count = serverData.streak.currentStreak;
+    }
+
+    saveProgress(localData);
+  } catch {
+    // Offline — keep local data
+  }
 };

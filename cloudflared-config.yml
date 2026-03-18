@@ -1,0 +1,27 @@
+# Cloudflare Tunnel config for PlayENG 3000
+# Place this at: /root/.cloudflared/config.yml on your Unraid server
+#
+# Setup steps:
+# 1. Install cloudflared: https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/
+# 2. Authenticate: cloudflared tunnel login
+# 3. Create tunnel: cloudflared tunnel create playeng
+# 4. Copy the tunnel ID and credentials file path below
+# 5. Add DNS records: cloudflared tunnel route dns playeng angolozzunk.hu
+# 6. Add DNS records: cloudflared tunnel route dns playeng www.angolozzunk.hu
+# 7. Copy this file to /root/.cloudflared/config.yml
+# 8. Start: cloudflared tunnel run playeng
+# 9. Auto-start: cloudflared service install
+
+tunnel: REPLACE_WITH_YOUR_TUNNEL_ID
+credentials-file: /root/.cloudflared/REPLACE_WITH_YOUR_TUNNEL_ID.json
+
+ingress:
+  - hostname: angolozzunk.hu
+    service: http://localhost:5008
+    originRequest:
+      noTLSVerify: true
+  - hostname: www.angolozzunk.hu
+    service: http://localhost:5008
+    originRequest:
+      noTLSVerify: true
+  - service: http_status:404

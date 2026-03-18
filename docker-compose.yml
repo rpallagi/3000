@@ -1,10 +1,49 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: playeng-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: playeng
+      POSTGRES_USER: playeng
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-playeng-dev-password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U playeng"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     build: ./backend
     container_name: playeng-backend
     restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://playeng:${DB_PASSWORD:-playeng-dev-password}@db:5432/playeng
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-change-in-production}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-jwt-secret-change-in-production}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      FACEBOOK_APP_ID: ${FACEBOOK_APP_ID:-}
+      FACEBOOK_APP_SECRET: ${FACEBOOK_APP_SECRET:-}
+      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID:-}
+      APPLE_TEAM_ID: ${APPLE_TEAM_ID:-}
+      APPLE_KEY_ID: ${APPLE_KEY_ID:-}
+      SIMPLEPAY_MERCHANT_ID: ${SIMPLEPAY_MERCHANT_ID:-}
+      SIMPLEPAY_SECRET_KEY: ${SIMPLEPAY_SECRET_KEY:-}
+      SIMPLEPAY_SANDBOX: ${SIMPLEPAY_SANDBOX:-true}
+      CLAUDE_API_KEY: ${CLAUDE_API_KEY:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://angolozzunk.hu,https://www.angolozzunk.hu,http://localhost:3001,http://localhost:8080}
+      RP_ID: ${RP_ID:-angolozzunk.hu}
+      RP_ORIGIN: ${RP_ORIGIN:-https://angolozzunk.hu}
+    depends_on:
+      db:
+        condition: service_healthy
     expose:
       - "5000"
 
@@ -16,3 +55,6 @@ services:
       - "5008:80"
     depends_on:
       - backend
+
+volumes:
+  pgdata:
