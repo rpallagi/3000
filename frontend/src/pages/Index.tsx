@@ -6,6 +6,7 @@ import LevelCard from "@/components/LevelCard";
 import ExerciseDemo from "@/components/ExerciseDemo";
 import { motion } from "framer-motion";
 import { fetchLevels, LevelData } from "@/utils/api";
+import { getStreak } from "@/utils/progress";
 
 const FALLBACK_LEVELS = [
   { level: 1, title: "Foundations", subtitle: "A túlélőkészlet", wordRange: "1–500 szó", active: true },
@@ -97,8 +98,80 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Streak & Daily Challenge */}
+      <section className="w-full flex flex-col items-center gap-4 px-5 sm:px-6">
+        {(() => {
+          const streak = getStreak();
+          if (streak <= 0) return null;
+
+          const messages = [
+            "", // 0
+            "Szuper kezdet!", // 1
+            "Szépen haladsz!", // 2
+            "Három nap sorozatban!", // 3
+            "Kitartás!", // 4
+            "Öt napos lendület!", // 5
+            "Egy hete nem állsz meg!", // 6-7
+            "Egy hete nem állsz meg!",
+          ];
+          const msg = streak >= 30 ? "Legenda vagy!" :
+                      streak >= 14 ? "Két hete tanulsz!" :
+                      streak >= 7  ? messages[6] :
+                      messages[Math.min(streak, 7)];
+
+          const days = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - (6 - i));
+            return {
+              label: ["V", "H", "K", "Sze", "Cs", "P", "Szo"][d.getDay()],
+              active: i >= 7 - Math.min(streak, 7),
+            };
+          });
+
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="max-w-2xl w-full bg-card border border-border rounded-2xl p-5 sm:p-6"
+              style={{ boxShadow: "var(--card-shadow)" }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center flex-shrink-0">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--warning, 38 92% 50%))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-foreground">{streak} napos sorozat</p>
+                    <p className="text-sm text-muted-foreground">{msg}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between gap-1">
+                {days.map((d, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1.5">
+                    <div
+                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${
+                        d.active
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-muted-foreground"
+                      }`}
+                    >
+                      {d.active ? (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+                      ) : null}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">{d.label}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          );
+        })()}
+      </section>
+
       {/* Daily Challenge Banner */}
-      <section className="w-full flex justify-center px-5 sm:px-6">
+      <section className="w-full flex justify-center px-5 sm:px-6 mt-4">
         <motion.button
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -144,13 +217,18 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="w-full py-12 px-6 border-t border-border">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="text-sm text-muted-foreground">
             © 2026 <span className="text-primary">Play</span><span className="text-foreground font-bold">ENG</span>
           </span>
-          <span className="text-sm text-muted-foreground">
-            Oxford 3000 alapú mondatépítő platform
-          </span>
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate("/terms")} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              ÁSZF
+            </button>
+            <button onClick={() => navigate("/privacy")} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              Adatvédelem
+            </button>
+          </div>
         </div>
       </footer>
     </div>

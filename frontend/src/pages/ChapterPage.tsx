@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Play, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Play, CheckCircle2, Shield } from "lucide-react";
 import Header from "@/components/Header";
 import { fetchChapter, ChapterDetail } from "@/utils/api";
-import { getLessonResult } from "@/utils/progress";
+import { getLessonResult, getChapterProgress } from "@/utils/progress";
 
 const ChapterPage = () => {
   const { chapterId } = useParams<{ chapterId: string }>();
@@ -75,6 +75,53 @@ const ChapterPage = () => {
         </motion.div>
 
         <div className="flex flex-col gap-4">
+          {(() => {
+            const completedLessons = getChapterProgress(Number(chapterId)).filter(
+              (l) => l.lessonId !== 0
+            ).length;
+            const allComplete = completedLessons >= totalLessons;
+            const testResult = getLessonResult(Number(chapterId), 0);
+
+            if (allComplete) {
+              return (
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                  whileHover={{ y: -4, boxShadow: "var(--card-shadow-hover)" }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate(`/chapter/${chapterId}/test`)}
+                  className="w-full text-left p-6 md:p-8 bg-gradient-to-br from-primary/5 to-primary/10 rounded-[24px] border border-primary/20 hover:border-primary/40 transition-colors cursor-pointer mb-6"
+                  style={{ boxShadow: "var(--card-shadow)" }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        {testResult ? (
+                          <CheckCircle2 className="w-5 h-5 text-success" />
+                        ) : (
+                          <Shield className="w-5 h-5 text-primary" />
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-lg font-semibold text-primary">Fejezet teszt</h3>
+                        <p className="text-sm text-muted-foreground">
+                          10 random szó az egész fejezetből · +50 pont
+                        </p>
+                      </div>
+                    </div>
+                    {testResult && (
+                      <span className="text-xs text-success font-medium">
+                        {Math.round((testResult.score / testResult.maxScore) * 100)}%
+                      </span>
+                    )}
+                  </div>
+                </motion.button>
+              );
+            }
+            return null;
+          })()}
+
           {lessons.map((lessonId, i) => {
             const result = getLessonResult(Number(chapterId), lessonId);
             const start = (lessonId - 1) * 10;

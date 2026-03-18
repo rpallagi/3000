@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, Volume2, RotateCcw } from "lucide-react";
+import { ArrowLeft, BookOpen, Volume2, RotateCcw, Target } from "lucide-react";
 import Header from "@/components/Header";
 import { getErrorWords } from "@/utils/progress";
 import { fetchLevels, WordData } from "@/utils/api";
@@ -228,22 +228,36 @@ const ErrorDictionaryPage = () => {
           </motion.div>
         ) : (
           <>
-            {/* Practice button */}
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                setPracticeMode(true);
-                setCurrentPracticeIndex(0);
-                setShowAnswer(false);
-              }}
-              className="w-full mb-6 flex items-center justify-center gap-2 px-6 py-4 bg-primary text-primary-foreground rounded-2xl text-base font-medium hover:opacity-90 transition-opacity"
-            >
-              <RotateCcw className="w-5 h-5" />
-              Gyakorlás ({errorWords.length} szó)
-            </motion.button>
+            {/* Practice buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate("/weak-words-practice")}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-primary text-primary-foreground rounded-2xl text-base font-medium hover:opacity-90 transition-opacity"
+              >
+                <Target className="w-5 h-5" />
+                Célzott gyakorlás
+              </motion.button>
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setPracticeMode(true);
+                  setCurrentPracticeIndex(0);
+                  setShowAnswer(false);
+                }}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 border border-border text-foreground rounded-2xl text-base font-medium hover:border-primary/30 transition-colors"
+              >
+                <RotateCcw className="w-5 h-5" />
+                Villámkártyák
+              </motion.button>
+            </div>
 
             {/* Word list */}
             <div className="space-y-3">

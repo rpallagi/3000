@@ -15,6 +15,10 @@ import SubscriptionPage from "./pages/SubscriptionPage.tsx";
 import TutorPage from "./pages/TutorPage.tsx";
 import ErrorDictionaryPage from "./pages/ErrorDictionaryPage.tsx";
 import DailyChallengePage from "./pages/DailyChallengePage.tsx";
+import ChapterTestPage from "./pages/ChapterTestPage.tsx";
+import WeakWordsPracticePage from "./pages/WeakWordsPracticePage.tsx";
+import TermsPage from "./pages/TermsPage.tsx";
+import PrivacyPage from "./pages/PrivacyPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -36,8 +40,12 @@ const App = () => (
               <Route path="/chapter/:chapterId" element={<ChapterPage />} />
               <Route path="/chapter/:chapterId/lesson/:lessonId" element={<LessonPage />} />
               <Route path="/chapter/:chapterId/lesson/:lessonId/practice" element={<PracticePage />} />
+              <Route path="/chapter/:chapterId/test" element={<ChapterTestPage />} />
               <Route path="/error-dictionary" element={<ErrorDictionaryPage />} />
               <Route path="/daily" element={<DailyChallengePage />} />
+              <Route path="/weak-words-practice" element={<WeakWordsPracticePage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
