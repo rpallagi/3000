@@ -5,3 +5,11 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
+
+# Secrets — SOHA ne kerüljön git-re!
+SECRETS.md
+SECRETS*.md
+*SECRET*
+*.secret
+.env.local
+.env.production
