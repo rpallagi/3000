@@ -1,0 +1,2239 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayENG - Angol tanulás a magyar fejjel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --green: #4CAF50;
+            --pink: #E91E63;
+            --orange: #FF9800;
+            --blue: #1565C0;
+            --bg: #FAFAFA;
+            --white: #FFFFFF;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        /* IPHONE FRAME */
+        .phone-frame {
+            width: 393px;
+            height: 852px;
+            background: #000;
+            border-radius: 60px;
+            padding: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 28px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .phone-content {
+            width: 100%;
+            height: 100%;
+            background: var(--white);
+            border-radius: 48px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes greenFlash {
+            0%, 100% { background: transparent; }
+            50% { background: rgba(76, 175, 80, 0.2); }
+        }
+
+        @keyframes redShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* SPLASH */
+        .splash-content {
+            background: radial-gradient(circle at 30% 30%, #66BB6A, #1B5E20);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .splash-mascot {
+            font-size: 100px;
+            animation: float 3s ease-in-out infinite;
+            margin-bottom: 30px;
+        }
+
+        .splash-logo {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .splash-tagline {
+            font-size: 18px;
+            margin-bottom: 30px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .splash-features {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 15px 20px;
+            font-size: 15px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--green);
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: var(--shadow);
+            visibility: hidden;
+            animation: fadeIn 0.3s ease-out 3s forwards, pulse 2s ease-in-out 3s infinite;
+        }
+
+        .btn-primary:active { transform: scale(0.97); }
+
+        /* ONBOARDING */
+        .onboarding-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .onboarding-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .onboarding-mascot {
+            font-size: 80px;
+            margin-bottom: 30px;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .onboarding-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #222;
+        }
+
+        .onboarding-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .cards-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-emoji {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 8px;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .timing-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .timing-card.selected {
+            border-color: var(--green);
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .timing-emoji { font-size: 28px; }
+
+        .timing-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .timing-duration {
+            font-size: 16px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .timing-desc {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .radio-btn {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timing-card.selected .radio-btn::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--green);
+            border-radius: 50%;
+        }
+
+        .dots-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #ddd;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: var(--green);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .btn-nav {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            margin: 0 20px 20px;
+            align-self: center;
+        }
+
+        .btn-nav:active { transform: scale(0.97); }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--green) 0%, #45a049 100%);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-mascot { font-size: 28px; }
+
+        .header-logo {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* HOME */
+        .home-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .welcome-text {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid var(--green);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .unit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .unit-header {
+            font-size: 13px;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 15px 0 10px;
+        }
+
+        .lesson-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .lesson-card:active { transform: scale(0.98); }
+
+        .lesson-icon { font-size: 24px; margin-right: 15px; }
+
+        .lesson-info { flex: 1; }
+
+        .lesson-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 6px;
+        }
+
+        .lesson-desc {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .lesson-arrow { font-size: 20px; color: #ccc; }
+
+        .lesson-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* BOTTOM NAV */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: white;
+            border-top: 1px solid #eee;
+            padding: 12px 0;
+            box-shadow: 0 -2px 12px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #999;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active { color: var(--green); }
+
+        .nav-emoji {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* TASK */
+        .task-header {
+            background: white;
+            padding: 16px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .task-back {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .task-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .task-progress { font-size: 14px; color: #666; }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 20px 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green), #66BB6A);
+            border-radius: 3px;
+            transition: width 0.5s ease-out;
+            width: 0%;
+        }
+
+        .task-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid;
+        }
+
+        .task-card.vocab { border-left-color: var(--pink); }
+        .task-card.grammar { border-left-color: var(--green); }
+        .task-card.communication { border-left-color: var(--blue); }
+        .task-card.activity { border-left-color: var(--orange); }
+
+        .task-card:active { transform: scale(0.98); }
+
+        .task-info { flex: 1; }
+
+        .task-num {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+
+        .task-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .task-arrow { font-size: 20px; color: #ccc; }
+
+        .start-all-btn {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 0 20px 20px;
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
+        }
+
+        .start-all-btn:active { transform: scale(0.97); }
+
+        /* TASK SCREEN */
+        .task-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .task-screen-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .word-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .word-english {
+            font-size: 48px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .word-hungarian {
+            font-size: 24px;
+            color: var(--pink);
+            font-weight: 600;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 0.5s forwards;
+        }
+
+        .word-image { font-size: 80px; margin: 20px 0; }
+
+        .word-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn-icon {
+            background: white;
+            border: 2px solid var(--green);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon.filled {
+            background: var(--green);
+            color: white;
+        }
+
+        .next-word-btn {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            box-shadow: var(--shadow);
+        }
+
+        .next-word-btn:active { transform: scale(0.97); }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .answer-btn {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #222;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .answer-btn:active { transform: scale(0.98); }
+
+        .answer-btn.correct {
+            background: #E8F5E9;
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .answer-btn.wrong {
+            background: #FFEBEE;
+            border-color: var(--pink);
+            color: var(--pink);
+            animation: redShake 0.4s ease-out;
+        }
+
+        .feedback-box {
+            background: #FFF3E0;
+            border-left: 4px solid var(--orange);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .typing-boxes {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .typing-box {
+            width: 48px;
+            height: 56px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            box-shadow: var(--shadow);
+        }
+
+        .typing-box.filled {
+            background: #E8F5E9;
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .typing-box.error {
+            background: #FFEBEE;
+            border-color: var(--pink);
+            animation: redShake 0.3s ease-out;
+        }
+
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            margin: 20px 0;
+        }
+
+        .key-btn {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        .key-btn:active {
+            background: var(--green);
+            color: white;
+            transform: scale(0.95);
+        }
+
+        .key-btn.used {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .grammar-rule {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--green);
+        }
+
+        .rule-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--green);
+            margin-bottom: 12px;
+        }
+
+        .rule-content {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .rule-example {
+            background: rgba(76, 175, 80, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .exception-box {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--orange);
+            cursor: pointer;
+        }
+
+        .exception-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--orange);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .exception-content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .exception-box.expanded .exception-content {
+            display: block;
+        }
+
+        .sentence-builder {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 80px;
+            margin: 20px 0;
+            border: 2px dashed #ddd;
+            box-shadow: var(--shadow);
+        }
+
+        .word-bubble {
+            background: var(--pink);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .word-bubble.available {
+            background: white;
+            color: #333;
+            border: 2px solid var(--pink);
+        }
+
+        .words-pool {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .dialogue-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .dialogue-speaker {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--green);
+            margin-bottom: 8px;
+        }
+
+        .dialogue-text {
+            font-size: 15px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .dialogue-situation {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(225, 30, 99, 0.1));
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+        }
+
+        .speech-phase {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .phase-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--green);
+            margin-bottom: 15px;
+        }
+
+        .phase-text {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .mic-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--pink);
+            color: white;
+            border: none;
+            font-size: 36px;
+            cursor: pointer;
+            margin: 0 auto;
+            box-shadow: var(--shadow-lg);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .mic-btn:active {
+            transform: scale(0.95);
+            animation: none;
+        }
+
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0;
+            font-size: 32px;
+        }
+
+        .star {
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+
+        .star.filled { opacity: 1; }
+
+        .mini-speech {
+            background: rgba(225, 30, 99, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 20px 0;
+            text-align: center;
+            border: 2px dashed var(--pink);
+        }
+
+        .mini-speech-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--pink);
+            margin-bottom: 10px;
+        }
+
+        .mini-speech-text {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .success-message {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--green);
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .understood-btn {
+            background: white;
+            border: 2px solid var(--green);
+            color: var(--green);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 10px auto;
+            display: block;
+        }
+
+        /* COMPLETION */
+        .completion-screen {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.05), rgba(225, 30, 99, 0.05));
+        }
+
+        .completion-mascot {
+            font-size: 100px;
+            margin-bottom: 20px;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .completion-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 10px;
+        }
+
+        .completion-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .stats-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .stat-item strong { font-weight: 700; }
+
+        .streak-badge {
+            background: linear-gradient(135deg, var(--orange), #FF6F00);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        .achievement-text {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .completion-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .btn-next {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-next:active { transform: scale(0.97); }
+
+        .btn-back {
+            background: white;
+            color: var(--green);
+            border: 2px solid var(--green);
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-back:active { transform: scale(0.97); }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            width: 95%;
+            max-height: 85%;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .book-page {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .book-page-num {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .book-page-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 20px;
+        }
+
+        .book-page-content {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .translatable {
+            color: var(--green);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: underline dotted;
+        }
+
+        .translation-popup {
+            position: fixed;
+            background: var(--green);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 2000;
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* STATS */
+        .stats-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .stat-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green), #66BB6A);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-circle-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .stat-circle-label {
+            font-size: 12px;
+            margin-top: 4px;
+            text-align: center;
+        }
+
+        .stat-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .progress-value {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .progress-bar-small {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green), #66BB6A);
+            border-radius: 3px;
+            transition: width 0.5s ease-out;
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, var(--blue), #0d47a1);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        /* PROFILE */
+        .profile-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-mascot {
+            font-size: 80px;
+            margin-bottom: 15px;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 5px;
+        }
+
+        .profile-level {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .badge {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+
+        .badge.locked { opacity: 0.5; }
+
+        .badge-emoji {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .badge-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #222;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="phone-content">
+            <!-- SPLASH -->
+            <div class="screen splash-screen active">
+                <div class="splash-content">
+                    <div class="splash-mascot">🦉</div>
+                    <div class="splash-logo">pl<span style="color: #E91E63;">▶y</span><span style="color: #E91E63;">ENG</span></div>
+                    <div class="splash-tagline">Magyar fejjel, angol nyelven.</div>
+                    <p style="color: white; font-size: 14px; margin-bottom: 20px; line-height: 1.6;">A PlayENG módszerrel töredék idő alatt, magabiztosan érsz célba.</p>
+                    <div class="splash-features">
+                        <div class="feature-card">🗣️ Nemcsak tanulsz — megtanulsz beszélni.</div>
+                        <div class="feature-card">🇺🇸 Anyanyelvi oktatóval gyakorolhatod az élő beszédet.</div>
+                        <div class="feature-card">⚡ 4× gyorsabb fejlődés.</div>
+                    </div>
+                    <button class="btn-primary" onclick="goToOnboarding()">Kezdjük!</button>
+                </div>
+            </div>
+
+            <!-- ONBOARDING -->
+            <div class="screen onboarding-screen">
+                <div class="onboarding-content">
+                    <div class="onboarding-mascot">🦉</div>
+                    <div class="onboarding-title" id="onboardingTitle">Üdvözlünk a PlayENG-ben! 👋</div>
+                    <p class="onboarding-subtitle" id="onboardingSubtitle">Magyaroknak fejlesztettük — a te logikádhoz igazítva.</p>
+                    <div class="cards-grid" id="onboardingCards"></div>
+                    <div class="dots-nav">
+                        <div class="dot active" id="dot0"></div>
+                        <div class="dot" id="dot1"></div>
+                        <div class="dot" id="dot2"></div>
+                    </div>
+                </div>
+                <button class="btn-nav" id="onboardingBtn" onclick="nextOnboarding()">Tovább →</button>
+            </div>
+
+            <!-- HOME -->
+            <div class="screen home-screen">
+                <div class="header">
+                    <div class="header-left">
+                        <div class="header-mascot">🦉</div>
+                        <div class="header-logo">pl▶yENG</div>
+                    </div>
+                    <div class="header-right"><span>🔥</span><span>1</span></div>
+                </div>
+                <div class="home-content">
+                    <div class="stats-bar">
+                        <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Ma: perc</div></div>
+                        <div class="stat-card"><div class="stat-value">0/972</div><div class="stat-label">szó</div></div>
+                    </div>
+                    <div class="stat-card" style="grid-column: 1 / -1; margin-bottom: 20px;"><div class="stat-label">⭐ Kezdő szint</div></div>
+                    <div class="welcome-text">Kezdd el az első leckét — már 5 perc után érezni fogod a különbséget!</div>
+                    <div class="unit-list">
+                        <div class="unit-header">1. RÉSZ — ALAPOK</div>
+                        <div class="lesson-card" onclick="goToTask()">
+                            <div class="lesson-icon">▶</div>
+                            <div class="lesson-info">
+                                <div class="lesson-title">1A — Névelők</div>
+                                <div class="lesson-desc">a/an/the · 6 szó</div>
+                            </div>
+                            <div class="lesson-arrow">→</div>
+                        </div>
+                        <div class="lesson-card locked">
+                            <div class="lesson-icon">🔒</div>
+                            <div class="lesson-info">
+                                <div class="lesson-title">1B — Többes szám</div>
+                                <div class="lesson-desc">Számok · Plurál</div>
+                            </div>
+                            <div class="lesson-arrow">→</div>
+                        </div>
+                        <div class="lesson-card locked">
+                            <div class="lesson-icon">🔒</div>
+                            <div class="lesson-info">
+                                <div class="lesson-title">1C — Létige</div>
+                                <div class="lesson-desc">Bemutatkozás</div>
+                            </div>
+                            <div class="lesson-arrow">→</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <button class="nav-item active" onclick="showScreen('home-screen')"><span class="nav-emoji">📚</span>Tanulás</button>
+                    <button class="nav-item" onclick="showScreen('stats-screen')"><span class="nav-emoji">📊</span>Statisztika</button>
+                    <button class="nav-item" onclick="showScreen('profile-screen')"><span class="nav-emoji">👤</span>Profilom</button>
+                </div>
+            </div>
+
+            <!-- TASK LIST -->
+            <div class="screen task-list-screen">
+                <div class="task-header">
+                    <button class="task-back" onclick="goBack()">←</button>
+                    <div class="task-title">1A — Névelők</div>
+                    <div class="task-progress">0/10</div>
+                </div>
+                <div class="progress-bar-container"><div class="progress-bar" id="listProgressBar"></div></div>
+                <div class="task-list" id="taskListContainer"></div>
+                <button class="start-all-btn" onclick="startTask(0)">Összes feladat indítása →</button>
+            </div>
+
+            <!-- TASK -->
+            <div class="screen task-screen">
+                <div class="task-header">
+                    <button class="task-back" onclick="goBack()">←</button>
+                    <div class="task-title" id="currentTaskTitle">Feladat</div>
+                    <div class="task-progress" id="taskProgress">1/10</div>
+                </div>
+                <div class="progress-bar-container"><div class="progress-bar" id="taskProgressBar" style="width: 10%;"></div></div>
+                <div class="task-screen-content" id="taskContent"></div>
+            </div>
+
+            <!-- STATS -->
+            <div class="screen stats-screen">
+                <div class="header">
+                    <div class="header-left">
+                        <div class="header-mascot">🦉</div>
+                        <div class="header-logo">pl▶yENG</div>
+                    </div>
+                </div>
+                <div class="stats-content">
+                    <div class="stat-circle"><div class="stat-circle-value">4</div><div class="stat-circle-label">perc ma</div></div>
+                    <div class="stat-section">
+                        <div class="stat-section-title">Tanulás</div>
+                        <div class="progress-item"><div class="progress-label">Összes tanulás</div><div class="progress-value">4 perc</div></div>
+                        <div class="progress-bar-small"><div class="progress-fill" style="width: 100%;"></div></div>
+                    </div>
+                    <div class="stat-section">
+                        <div class="stat-section-title">Szókincs</div>
+                        <div class="progress-item"><div class="progress-label">Megtanult szavak</div><div class="progress-value">6 / 972</div></div>
+                        <div class="progress-bar-small"><div class="progress-fill" style="width: 5%;"></div></div>
+                    </div>
+                    <div class="stat-section">
+                        <div class="stat-section-title">Sorozat</div>
+                        <div style="font-size: 28px; text-align: center; margin: 10px 0; font-weight: 700; color: var(--orange);">🔥 1</div>
+                        <div style="font-size: 13px; text-align: center; color: #666;">1 napos sorozat</div>
+                    </div>
+                    <div class="stat-section">
+                        <div class="stat-section-title">Szint</div>
+                        <div class="level-badge">⭐ Kezdő — Még 2 lecke a Tanuló szintig</div>
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <button class="nav-item" onclick="showScreen('home-screen')"><span class="nav-emoji">📚</span>Tanulás</button>
+                    <button class="nav-item active" onclick="showScreen('stats-screen')"><span class="nav-emoji">📊</span>Statisztika</button>
+                    <button class="nav-item" onclick="showScreen('profile-screen')"><span class="nav-emoji">👤</span>Profilom</button>
+                </div>
+            </div>
+
+            <!-- PROFILE -->
+            <div class="screen profile-screen">
+                <div class="header">
+                    <div class="header-left">
+                        <div class="header-mascot">🦉</div>
+                        <div class="header-logo">pl▶yENG</div>
+                    </div>
+                </div>
+                <div class="profile-content">
+                    <div class="profile-header">
+                        <div class="profile-mascot">🦉</div>
+                        <div class="profile-name">Tanuló</div>
+                        <div class="profile-level">⭐ Kezdő szint</div>
+                    </div>
+                    <div class="stat-section">
+                        <div class="stat-section-title">SzintProgress</div>
+                        <div class="progress-bar-small" style="margin-top: 12px;"><div class="progress-fill" style="width: 25%;"></div></div>
+                    </div>
+                    <div style="margin-top: 20px; margin-bottom: 20px;">
+                        <div class="stat-section-title" style="margin-bottom: 12px;">Jelvények</div>
+                        <div class="badges-grid">
+                            <div class="badge"><div class="badge-emoji">🎯</div><div class="badge-name">Első lecke</div></div>
+                            <div class="badge locked"><div class="badge-emoji">🔥</div><div class="badge-name">7 napos sorozat</div></div>
+                            <div class="badge locked"><div class="badge-emoji">💯</div><div class="badge-name">Tökéletes nap</div></div>
+                            <div class="badge locked"><div class="badge-emoji">⭐</div><div class="badge-name">Tanuló szint</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom-nav">
+                    <button class="nav-item" onclick="showScreen('home-screen')"><span class="nav-emoji">📚</span>Tanulás</button>
+                    <button class="nav-item" onclick="showScreen('stats-screen')"><span class="nav-emoji">📊</span>Statisztika</button>
+                    <button class="nav-item active" onclick="showScreen('profile-screen')"><span class="nav-emoji">👤</span>Profilom</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOOK MODAL -->
+    <div class="modal" id="bookModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📖 Mondatalkotás I. — Névelők</div>
+                <button class="modal-close" onclick="closeBook()">✕</button>
+            </div>
+            <div class="book-page">
+                <div class="book-page-num">19. oldal</div>
+                <div class="book-page-title">NÉVELŐK (Articles)</div>
+                <div class="book-page-content">
+                    <strong>A/AN ejtése: /ə/ vagy /ən/</strong><br><br>
+                    <strong>ALAPSZABÁLY:</strong><br>
+                    • a → mássalhangzó hang előtt (a dog)<br>
+                    • an → magánhangzó hang előtt (an apple)<br><br>
+                    <strong>Magyaroknak fejlesztettük ezt a módszert.</strong><br>
+                    Könnyebb memorizálni, ha csak a betűk alapján döntesz!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const vocabulary = [
+            { en: 'dog', hu: 'kutya', emoji: '🐕' },
+            { en: 'cat', hu: 'macska', emoji: '🐈' },
+            { en: 'bus', hu: 'busz', emoji: '🚌' },
+            { en: 'apple', hu: 'alma', emoji: '🍎' },
+            { en: 'egg', hu: 'tojás', emoji: '🥚' },
+            { en: 'umbrella', hu: 'esernyő', emoji: '☂️' },
+        ];
+
+        const taskData = [
+            { id: 0, name: 'Szókincs', emoji: '🔊', type: 'vocab' },
+            { id: 1, name: 'Visszakérdezés', emoji: '🔄', type: 'vocab' },
+            { id: 2, name: 'Begépelés', emoji: '⌨️', type: 'vocab' },
+            { id: 3, name: 'Nyelvtan', emoji: '📐', type: 'grammar' },
+            { id: 4, name: 'Mondatépítő', emoji: '🧩', type: 'grammar' },
+            { id: 5, name: 'Kiegészítés', emoji: '✏️', type: 'grammar' },
+            { id: 6, name: 'Melyik a helyes?', emoji: '⚖️', type: 'grammar' },
+            { id: 7, name: 'Párbeszéd', emoji: '💬', type: 'communication' },
+            { id: 8, name: 'Beszédgyakorlat', emoji: '🎤', type: 'communication' },
+            { id: 9, name: 'Activity', emoji: '🎮', type: 'activity' },
+        ];
+
+        let currentScreen = 'splash-screen';
+        let currentTask = 0;
+        let onboardingStep = 0;
+        let currentWordIndex = 0;
+        let correctAnswers = 0;
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.querySelector('.' + screenId).classList.add('active');
+            currentScreen = screenId;
+
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if (screenId === 'home-screen') document.querySelectorAll('.nav-item')[0].classList.add('active');
+            if (screenId === 'stats-screen') document.querySelectorAll('.nav-item')[1].classList.add('active');
+            if (screenId === 'profile-screen') document.querySelectorAll('.nav-item')[2].classList.add('active');
+        }
+
+        function goToOnboarding() {
+            onboardingStep = 0;
+            updateOnboarding();
+            showScreen('onboarding-screen');
+        }
+
+        function updateOnboarding() {
+            const titles = ['Üdvözlünk a PlayENG-ben! 👋', 'Hogyan működik? 🚀', 'Gyakorolj napi pár percet! ⏱️'];
+            const subtitles = ['Magyaroknak fejlesztettük — a te logikádhoz igazítva.', 'Három lépésben tanulsz és beszélsz.', 'Válaszd ki a neked ideális tempót:'];
+
+            document.getElementById('onboardingTitle').textContent = titles[onboardingStep];
+            document.getElementById('onboardingSubtitle').textContent = subtitles[onboardingStep];
+
+            const cardsContainer = document.getElementById('onboardingCards');
+            cardsContainer.innerHTML = '';
+
+            if (onboardingStep === 0) {
+                const cards = [
+                    { emoji: '🎯', title: 'Magyaroknak fejlesztett módszer', desc: 'A magyar fejhez igazított tananyag.' },
+                    { emoji: '🗣️', title: 'Megtanulsz beszélni', desc: 'Az első naptól mondatokat építesz.' },
+                    { emoji: '🇺🇸', title: 'Anyanyelvi oktatóval', desc: 'Élő angol beszéd gyakorlás.' }
+                ];
+                cards.forEach(card => {
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.innerHTML = `<div class="card-emoji">${card.emoji}</div><div class="card-title">${card.title}</div><div class="card-desc">${card.desc}</div>`;
+                    cardsContainer.appendChild(div);
+                });
+            } else if (onboardingStep === 1) {
+                const cards = [
+                    { emoji: '1️⃣', title: 'Megérted', desc: 'Nyelvtant magyar fejjel kapod meg.' },
+                    { emoji: '2️⃣', title: 'Gyakorlod', desc: '10 féle feladattal rögzíted az anyagot.' },
+                    { emoji: '3️⃣', title: 'Beszélsz', desc: 'Valódi szituációkban használod.' }
+                ];
+                cards.forEach(card => {
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.innerHTML = `<div class="card-emoji">${card.emoji}</div><div class="card-title">${card.title}</div><div class="card-desc">${card.desc}</div>`;
+                    cardsContainer.appendChild(div);
+                });
+            } else {
+                const timings = [
+                    { emoji: '☕', duration: '5 perc', desc: 'Lazán · ~18 hónap' },
+                    { emoji: '📚', duration: '10 perc', desc: 'Ajánlott · ~11 hónap' },
+                    { emoji: '🚀', duration: '20 perc', desc: 'Intenzív · ~6 hónap' }
+                ];
+                timings.forEach((t, i) => {
+                    const div = document.createElement('div');
+                    div.className = `timing-card ${i === 1 ? 'selected' : ''}`;
+                    div.innerHTML = `<div class="timing-emoji">${t.emoji}</div><div class="timing-info"><div class="timing-duration">${t.duration}</div><div class="timing-desc">${t.desc}</div></div><div class="radio-btn"></div>`;
+                    div.onclick = () => { document.querySelectorAll('.timing-card').forEach(el => el.classList.remove('selected')); div.classList.add('selected'); };
+                    cardsContainer.appendChild(div);
+                });
+            }
+
+            document.querySelectorAll('.dot').forEach((dot, idx) => dot.classList.toggle('active', idx === onboardingStep));
+
+            const btn = document.getElementById('onboardingBtn');
+            if (onboardingStep === 2) {
+                btn.textContent = 'Indulás! →';
+                btn.onclick = () => showScreen('home-screen');
+            } else {
+                btn.textContent = 'Tovább →';
+                btn.onclick = () => { onboardingStep++; updateOnboarding(); };
+            }
+        }
+
+        function nextOnboarding() {
+            onboardingStep++;
+            if (onboardingStep <= 2) updateOnboarding();
+        }
+
+        function goToTask() {
+            const taskListContainer = document.getElementById('taskListContainer');
+            taskListContainer.innerHTML = '';
+
+            taskData.forEach((task, idx) => {
+                const card = document.createElement('div');
+                card.className = `task-card ${task.type}`;
+                card.innerHTML = `<div class="task-info"><div class="task-num">${task.id + 1}. ${task.emoji} ${task.name}</div></div><div class="task-arrow">▶</div>`;
+                card.onclick = () => startTask(idx);
+                taskListContainer.appendChild(card);
+            });
+
+            showScreen('task-list-screen');
+        }
+
+        function startTask(taskIndex) {
+            currentTask = taskIndex;
+            currentWordIndex = 0;
+            correctAnswers = 0;
+            renderTask();
+            showScreen('task-screen');
+        }
+
+        function renderTask() {
+            const taskNum = currentTask + 1;
+            document.getElementById('taskProgress').textContent = `${taskNum}/10`;
+            document.getElementById('currentTaskTitle').textContent = taskData[currentTask].name;
+            document.getElementById('taskProgressBar').style.width = `${(taskNum / 10) * 100}%`;
+
+            const taskContent = document.getElementById('taskContent');
+            taskContent.innerHTML = '';
+
+            if (currentTask === 0) renderVocab();
+            else if (currentTask === 1) renderAnswer();
+            else if (currentTask === 2) renderTyping();
+            else if (currentTask === 3) renderGrammar();
+            else if (currentTask === 4) renderSentenceBuilder();
+            else if (currentTask === 5) renderFillTask();
+            else if (currentTask === 6) renderChoiceTask();
+            else if (currentTask === 7) renderDialogue();
+            else if (currentTask === 8) renderSpeech();
+            else if (currentTask === 9) renderActivity();
+        }
+
+        function renderVocab() {
+            const taskContent = document.getElementById('taskContent');
+            if (currentWordIndex < vocabulary.length) {
+                const word = vocabulary[currentWordIndex];
+                const div = document.createElement('div');
+                div.className = 'word-card';
+                div.innerHTML = `
+                    <div class="word-english" onclick="showTranslation(this)" data-hu="${word.hu}">${word.en}</div>
+                    <div class="word-controls">
+                        <button class="btn-icon">🔊</button>
+                        <button class="btn-icon filled">🐌</button>
+                    </div>
+                    <div class="word-hungarian">${word.hu}</div>
+                    <div class="word-image">${word.emoji}</div>
+                    <button class="next-word-btn" onclick="nextWord()">Következő szó →</button>
+                `;
+                taskContent.appendChild(div);
+            } else {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <div class="mini-speech">
+                        <div class="mini-speech-title">🎤 Mini beszédgyakorlat!</div>
+                        <div class="mini-speech-text">Mondd utánam: This is a dog. 🔊</div>
+                    </div>
+                    <button class="next-word-btn" onclick="nextTask()">Megértettem →</button>
+                `;
+                taskContent.appendChild(div);
+            }
+        }
+
+        function nextWord() {
+            currentWordIndex++;
+            renderVocab();
+        }
+
+        function renderAnswer() {
+            const taskContent = document.getElementById('taskContent');
+            const questions = [
+                { hu: 'kutya', correct: 'dog', options: ['cat', 'dog', 'bus'] },
+                { hu: 'alma', correct: 'apple', options: ['egg', 'umbrella', 'apple'] },
+                { hu: 'esernyő', correct: 'umbrella', options: ['umbrella', 'bus', 'cat'] }
+            ];
+
+            if (currentWordIndex < questions.length) {
+                const q = questions[currentWordIndex];
+                const div = document.createElement('div');
+                div.innerHTML = `<div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px;"><div style="font-size: 24px; color: var(--pink); font-weight: 700; text-align: center; margin-bottom: 20px;">${q.hu}</div><div class="answers-grid" id="answersGrid"></div></div>`;
+                taskContent.appendChild(div);
+
+                const grid = div.querySelector('#answersGrid');
+                q.options.forEach(option => {
+                    const btn = document.createElement('button');
+                    btn.className = 'answer-btn';
+                    btn.textContent = option;
+                    btn.onclick = () => {
+                        if (option === q.correct) {
+                            btn.classList.add('correct');
+                            correctAnswers++;
+                            const msg = document.createElement('div');
+                            msg.className = 'success-message';
+                            msg.textContent = 'Helyes! ✅';
+                            taskContent.appendChild(msg);
+                            setTimeout(() => { currentWordIndex++; renderAnswer(); }, 1500);
+                        } else {
+                            btn.classList.add('wrong');
+                            const feedback = document.createElement('div');
+                            feedback.className = 'feedback-box';
+                            feedback.innerHTML = `<div class="feedback-title">💡 Helyes válasz:</div><div>${q.correct}</div>`;
+                            taskContent.appendChild(feedback);
+                            document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+                        }
+                    };
+                    grid.appendChild(btn);
+                });
+            } else {
+                nextTask();
+            }
+        }
+
+        function renderTyping() {
+            const taskContent = document.getElementById('taskContent');
+            const words = ['cat', 'egg'];
+
+            if (currentWordIndex < words.length) {
+                const word = words[currentWordIndex];
+                let typed = 0;
+                const div = document.createElement('div');
+                div.innerHTML = `<div style="text-align: center; margin: 20px 0;"><div class="typing-boxes" id="typingBoxes"></div><div class="keyboard" id="keyboard"></div></div>`;
+                taskContent.appendChild(div);
+
+                const boxesDiv = div.querySelector('#typingBoxes');
+                const boxes = [];
+                for (let i = 0; i < word.length; i++) {
+                    const box = document.createElement('div');
+                    box.className = 'typing-box';
+                    boxes.push(box);
+                    boxesDiv.appendChild(box);
+                }
+
+                const keyboardDiv = div.querySelector('#keyboard');
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                letters.forEach(letter => {
+                    const btn = document.createElement('button');
+                    btn.className = 'key-btn';
+                    btn.textContent = letter;
+                    btn.onclick = () => {
+                        if (typed < word.length && letter.toLowerCase() === word[typed]) {
+                            boxes[typed].textContent = letter;
+                            boxes[typed].classList.add('filled');
+                            typed++;
+                            btn.classList.add('used');
+
+                            if (typed === word.length) {
+                                const msg = document.createElement('div');
+                                msg.className = 'success-message';
+                                msg.textContent = 'Helyes! 🎉';
+                                taskContent.appendChild(msg);
+                                correctAnswers++;
+
+                                setTimeout(() => {
+                                    currentWordIndex++;
+                                    renderTyping();
+                                }, 1500);
+                            }
+                        }
+                    };
+                    keyboardDiv.appendChild(btn);
+                });
+            } else {
+                nextTask();
+            }
+        }
+
+        function renderGrammar() {
+            const taskContent = document.getElementById('taskContent');
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <div class="grammar-rule">
+                    <div class="rule-title">📏 ALAPSZABÁLY</div>
+                    <div class="rule-content">
+                        <strong>a / an = egy (angolul)</strong><br><br>
+                        <strong>a</strong> → mássalhangzó betűvel kezdődő szó előtt<br>
+                        Példa: a dog 🐕 · a cat 🐈 · a bus 🚌<br><br>
+                        <strong>an</strong> → magánhangzó betűvel (a, e, i, o, u) kezdődő szó előtt<br>
+                        Példa: an apple 🍎 · an egg 🥚 · an umbrella ☂️
+                    </div>
+                    <div class="rule-example">💡 TIPP: Az esetek 99%-ában a szó első betűje alapján döntesz!</div>
+                </div>
+                <div class="exception-box" onclick="this.classList.toggle('expanded')">
+                    <div class="exception-title">⚠️ FIGYELEM — Haladóknak (ritka kivételek)<span style="margin-left: auto;">▼</span></div>
+                    <div class="exception-content">Néha a kiejtés eltér az írástól: a university (ju-t ejtünk), an hour (h néma). De ez nagyon ritka!</div>
+                </div>
+                <button class="next-word-btn" onclick="openBook()">📖 Könyv mód</button>
+                <button class="next-word-btn" onclick="nextTask()" style="background: white; color: var(--green); border: 2px solid var(--green);">Megértettem →</button>
+            `;
+            taskContent.appendChild(div);
+            correctAnswers++;
+        }
+
+        function openBook() {
+            document.getElementById('bookModal').classList.add('active');
+        }
+
+        function closeBook() {
+            document.getElementById('bookModal').classList.remove('active');
+        }
+
+        function renderSentenceBuilder() {
+            const taskContent = document.getElementById('taskContent');
+            const sentences = [
+                { target: 'This is a dog', words: ['dog', 'a', 'This', 'is', 'an'] },
+                { target: 'This is an apple', words: ['apple', 'is', 'an', 'This', 'a'] }
+            ];
+
+            if (currentWordIndex < sentences.length) {
+                const sentence = sentences[currentWordIndex];
+                let built = [];
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <div class="sentence-builder" id="builtArea"></div>
+                    <div class="words-pool" id="wordsPool"></div>
+                `;
+                taskContent.appendChild(div);
+
+                const builtArea = div.querySelector('#builtArea');
+                const pool = div.querySelector('#wordsPool');
+                const availableWords = [...sentence.words];
+
+                function render() {
+                    pool.innerHTML = '';
+                    availableWords.forEach((word, idx) => {
+                        const bubble = document.createElement('div');
+                        bubble.className = 'word-bubble available';
+                        bubble.textContent = word;
+                        bubble.onclick = () => {
+                            built.push(word);
+                            availableWords.splice(idx, 1);
+                            render();
+
+                            builtArea.innerHTML = built.map(w => `<div class="word-bubble">${w}</div>`).join('');
+                            if (built.join(' ') === sentence.target.split(' ').join(' ')) {
+                                correctAnswers++;
+                                const msg = document.createElement('div');
+                                msg.className = 'success-message';
+                                msg.textContent = 'Helyes! 🎉';
+                                taskContent.appendChild(msg);
+
+                                setTimeout(() => {
+                                    currentWordIndex++;
+                                    renderSentenceBuilder();
+                                }, 1500);
+                            }
+                        };
+                        pool.appendChild(bubble);
+                    });
+                }
+                render();
+            } else {
+                nextTask();
+            }
+        }
+
+        function renderFillTask() {
+            const taskContent = document.getElementById('taskContent');
+            const sentences = [
+                { text: 'This is _____ dog.', answer: 'a' },
+                { text: 'This is _____ egg.', answer: 'an' },
+                { text: 'This is _____ umbrella.', answer: 'an' }
+            ];
+
+            if (currentWordIndex < sentences.length) {
+                const s = sentences[currentWordIndex];
+                let filled = '';
+                const div = document.createElement('div');
+                div.innerHTML = `<div style="text-align: center; margin: 20px 0; font-size: 16px; color: #333;">${s.text}</div><div class="typing-boxes" id="fillBoxes"></div><div class="keyboard" id="fillKeyboard"></div>`;
+                taskContent.appendChild(div);
+
+                const boxesDiv = div.querySelector('#fillBoxes');
+                const boxes = [];
+                for (let i = 0; i < s.answer.length; i++) {
+                    const box = document.createElement('div');
+                    box.className = 'typing-box';
+                    boxes.push(box);
+                    boxesDiv.appendChild(box);
+                }
+
+                const keyboardDiv = div.querySelector('#fillKeyboard');
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                letters.forEach(letter => {
+                    const btn = document.createElement('button');
+                    btn.className = 'key-btn';
+                    btn.textContent = letter;
+                    btn.onclick = () => {
+                        if (filled.length < s.answer.length && letter.toLowerCase() === s.answer[filled.length]) {
+                            boxes[filled.length].textContent = letter;
+                            boxes[filled.length].classList.add('filled');
+                            filled += letter.toLowerCase();
+                            btn.classList.add('used');
+
+                            if (filled === s.answer) {
+                                const msg = document.createElement('div');
+                                msg.className = 'success-message';
+                                msg.textContent = 'Helyes! 🎉';
+                                taskContent.appendChild(msg);
+                                correctAnswers++;
+
+                                setTimeout(() => {
+                                    currentWordIndex++;
+                                    renderFillTask();
+                                }, 1500);
+                            }
+                        }
+                    };
+                    keyboardDiv.appendChild(btn);
+                });
+            } else {
+                nextTask();
+            }
+        }
+
+        function renderChoiceTask() {
+            const taskContent = document.getElementById('taskContent');
+            const questions = [
+                { correct: 'a dog', wrong: 'an dog' },
+                { correct: 'an apple', wrong: 'a apple' },
+                { correct: 'an hour', wrong: 'a hour' }
+            ];
+
+            if (currentWordIndex < questions.length) {
+                const q = questions[currentWordIndex];
+                const div = document.createElement('div');
+                div.innerHTML = `<div class="answers-grid" id="choiceAnswers"></div>`;
+                taskContent.appendChild(div);
+
+                const grid = div.querySelector('#choiceAnswers');
+                [q.correct, q.wrong].forEach(option => {
+                    const btn = document.createElement('button');
+                    btn.className = 'answer-btn';
+                    btn.textContent = option;
+                    btn.onclick = () => {
+                        if (option === q.correct) {
+                            btn.classList.add('correct');
+                            correctAnswers++;
+                            const msg = document.createElement('div');
+                            msg.className = 'success-message';
+                            msg.textContent = 'Helyes! ✅';
+                            taskContent.appendChild(msg);
+                            setTimeout(() => { currentWordIndex++; renderChoiceTask(); }, 1500);
+                        } else {
+                            btn.classList.add('wrong');
+                            const feedback = document.createElement('div');
+                            feedback.className = 'feedback-box';
+                            feedback.innerHTML = `<div class="feedback-title">💡 Helyes válasz:</div><div>${q.correct}</div>`;
+                            taskContent.appendChild(feedback);
+                            document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+                        }
+                    };
+                    grid.appendChild(btn);
+                });
+            } else {
+                nextTask();
+            }
+        }
+
+        function renderDialogue() {
+            const taskContent = document.getElementById('taskContent');
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <div class="dialogue-situation">🏪 Boltban</div>
+                <div class="dialogue-card">
+                    <div class="dialogue-speaker">Eladó:</div>
+                    <div class="dialogue-text">"Good morning! Can I help you?"</div>
+                </div>
+                <div class="answers-grid" id="dialogueAnswers"></div>
+            `;
+            taskContent.appendChild(div);
+
+            const options = [
+                { text: 'I am looking for an umbrella.', isCorrect: true },
+                { text: 'I looking for umbrella.', isCorrect: false },
+                { text: 'I am look for a umbrella.', isCorrect: false }
+            ];
+
+            const grid = div.querySelector('#dialogueAnswers');
+            options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = option.text;
+                btn.onclick = () => {
+                    if (option.isCorrect) {
+                        btn.classList.add('correct');
+                        correctAnswers++;
+                        nextTask();
+                    } else {
+                        btn.classList.add('wrong');
+                    }
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function renderSpeech() {
+            const taskContent = document.getElementById('taskContent');
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <div class="speech-phase">
+                    <div class="phase-title">🎤 Mondd ki!</div>
+                    <button class="mic-btn" onclick="nextTask()">🎤</button>
+                    <div class="star-rating">
+                        <span class="star filled">★</span>
+                        <span class="star filled">★</span>
+                        <span class="star filled">★</span>
+                        <span class="star filled">★</span>
+                        <span class="star">★</span>
+                    </div>
+                </div>
+            `;
+            taskContent.appendChild(div);
+            correctAnswers++;
+        }
+
+        function renderActivity() {
+            const taskContent = document.getElementById('taskContent');
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <div style="text-align: center; margin: 30px 0;">
+                    <div style="font-size: 16px; font-weight: 700; margin-bottom: 20px;">Hallgasd és találd ki!</div>
+                    <div style="font-size: 14px; color: #666; margin-bottom: 20px;">It is a fruit. It is red or green. You can eat it.</div>
+                    <div class="typing-boxes" id="activityBoxes"></div>
+                    <div class="keyboard" id="activityKeyboard"></div>
+                </div>
+            `;
+            taskContent.appendChild(div);
+
+            const word = 'apple';
+            let answered = '';
+            const boxesDiv = div.querySelector('#activityBoxes');
+            const boxes = [];
+            for (let i = 0; i < word.length; i++) {
+                const box = document.createElement('div');
+                box.className = 'typing-box';
+                boxes.push(box);
+                boxesDiv.appendChild(box);
+            }
+
+            const keyboardDiv = div.querySelector('#activityKeyboard');
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            letters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'key-btn';
+                btn.textContent = letter;
+                btn.onclick = () => {
+                    if (answered.length < word.length && letter.toLowerCase() === word[answered.length]) {
+                        boxes[answered.length].textContent = letter;
+                        boxes[answered.length].classList.add('filled');
+                        answered += letter.toLowerCase();
+                        btn.classList.add('used');
+
+                        if (answered === word) {
+                            const msg = document.createElement('div');
+                            msg.className = 'success-message';
+                            msg.textContent = 'Helyes! 🎉';
+                            taskContent.appendChild(msg);
+                            correctAnswers++;
+                            setTimeout(() => showCompletion(), 1500);
+                        }
+                    }
+                };
+                keyboardDiv.appendChild(btn);
+            });
+        }
+
+        function nextTask() {
+            currentTask++;
+            if (currentTask < 10) {
+                renderTask();
+            } else {
+                showCompletion();
+            }
+        }
+
+        function showCompletion() {
+            const content = document.getElementById('taskContent');
+            content.innerHTML = `
+                <div class="completion-screen" style="background: transparent;">
+                    <div class="completion-mascot">🎉🦉</div>
+                    <div class="completion-title">Szép munka!</div>
+                    <div class="completion-subtitle">1A — Névelők ✅ Teljesítve!</div>
+                    <div class="stats-box">
+                        <div class="stat-item"><span>📝 Feladatok</span><strong>10/10</strong></div>
+                        <div class="stat-item"><span>✅ Helyes</span><strong>8/10 (80%)</strong></div>
+                        <div class="stat-item"><span>📚 Szavak</span><strong>6 megtanult</strong></div>
+                        <div class="stat-item"><span>🕐 Idő</span><strong>4 perc 32s</strong></div>
+                    </div>
+                    <div class="streak-badge">🔥 1. nap — Holnap is jössz?</div>
+                    <div class="achievement-text">Gyorsabban haladsz, mint a tanulók 68%-a! 💪</div>
+                    <div style="margin-bottom: 20px; display: flex; justify-content: center; gap: 8px; font-size: 24px;">★★★★☆</div>
+                    <div class="completion-buttons">
+                        <button class="btn-next" onclick="showScreen('home-screen')">← Vissza a főoldalra</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function goBack() {
+            if (currentScreen === 'task-screen') showScreen('task-list-screen');
+            else if (currentScreen === 'task-list-screen') showScreen('home-screen');
+        }
+
+        function showTranslation(el) {
+            const hu = el.dataset.hu;
+            const popup = document.createElement('div');
+            popup.className = 'translation-popup';
+            popup.innerHTML = `${hu} 🔊`;
+            popup.style.position = 'fixed';
+            const rect = el.getBoundingClientRect();
+            popup.style.left = (rect.left) + 'px';
+            popup.style.top = (rect.top - 40) + 'px';
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 2000);
+        }
+    </script>
+</body>
+</html>
