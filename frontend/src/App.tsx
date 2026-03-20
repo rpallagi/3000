@@ -20,6 +20,11 @@ import WeakWordsPracticePage from "./pages/WeakWordsPracticePage.tsx";
 import TermsPage from "./pages/TermsPage.tsx";
 import PrivacyPage from "./pages/PrivacyPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
+// V4 unit-based pages
+import UnitListPage from "./pages/UnitListPage.tsx";
+import UnitPage from "./pages/UnitPage.tsx";
+import UnitLessonPage from "./pages/UnitLessonPage.tsx";
+import UnitPracticePage from "./pages/UnitPracticePage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -32,7 +37,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<UnitListPage />} />
+              <Route path="/home" element={<Index />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/subscription" element={<SubscriptionPage />} />
               <Route path="/tutor" element={<TutorPage />} />
@@ -44,6 +50,11 @@ const App = () => (
               <Route path="/error-dictionary" element={<ErrorDictionaryPage />} />
               <Route path="/daily" element={<DailyChallengePage />} />
               <Route path="/weak-words-practice" element={<WeakWordsPracticePage />} />
+              {/* V4 unit-based routes */}
+              <Route path="/units" element={<UnitListPage />} />
+              <Route path="/unit/:unitId" element={<UnitPage />} />
+              <Route path="/unit/:unitId/lesson/:lessonId" element={<UnitLessonPage />} />
+              <Route path="/unit/:unitId/lesson/:lessonId/practice" element={<UnitPracticePage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="*" element={<NotFound />} />

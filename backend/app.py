@@ -41,8 +41,11 @@ def create_app():
         from models.user import User, UserProgress, WordError, UserStreak, WebAuthnCredential
         db.create_all()
 
-    # --- Existing data API (unchanged) ---
+    # --- Existing data API (unchanged for backward compat) ---
     register_data_routes(app)
+
+    # --- V4 unit-based API ---
+    register_unit_routes(app)
 
     return app
 
@@ -217,6 +220,153 @@ Be warm and motivating like a supportive tutor."""
             pass
 
         return jsonify({'feedback': None}), 200
+
+
+def register_unit_routes(app):
+    """V4 unit-based API (Greta cowork 2026-03-19)."""
+
+    @app.route('/api/units', methods=['GET'])
+    def get_units():
+        """Return all 20 units with metadata (no words)."""
+        data = load_data()
+        units = []
+        for u in data.get('units', []):
+            units.append({
+                "id": u["id"],
+                "part": u["part"],
+                "order": u["order"],
+                "title": u["title"],
+                "titleEn": u["titleEn"],
+                "color": u["color"],
+                "grammarFocus": u["grammarFocus"],
+                "wordCount": u["wordCount"],
+            })
+        return jsonify(units)
+
+    @app.route('/api/units/<unit_id>', methods=['GET'])
+    def get_unit(unit_id):
+        """Return unit details with grammar, words, and task types."""
+        data = load_data()
+        unit = next((u for u in data.get('units', []) if u['id'] == unit_id), None)
+        if not unit:
+            return jsonify({"error": "Unit not found"}), 404
+        return jsonify(unit)
+
+    @app.route('/api/units/<unit_id>/lesson/<int:lesson_id>', methods=['GET'])
+    def get_unit_lesson(unit_id, lesson_id):
+        """Return a lesson (max 8 words) from a unit with distractors."""
+        data = load_data()
+        unit = next((u for u in data.get('units', []) if u['id'] == unit_id), None)
+        if not unit:
+            return jsonify({"error": "Unit not found"}), 404
+
+        words = unit['words']
+        per_lesson = 8  # Greta: max 6-8 words per lesson
+        start = (lesson_id - 1) * per_lesson
+        end = start + per_lesson
+        lesson_words = words[start:end]
+
+        if not lesson_words:
+            return jsonify({"error": "Lesson not found"}), 404
+
+        # Build distractors from all unit words
+        all_en = [w['word'] for w in words]
+        all_hu = [w['hungarian'] for w in words]
+        for w in lesson_words:
+            others_en = [x for x in all_en if x != w['word']]
+            others_hu = [x for x in all_hu if x != w['hungarian']]
+            w['distractors'] = random.sample(others_en, min(3, len(others_en)))
+            w['distractorsHu'] = random.sample(others_hu, min(3, len(others_hu)))
+
+        total_lessons = max(1, (len(words) + per_lesson - 1) // per_lesson)
+
+        return jsonify({
+            "unitId": unit_id,
+            "unitTitle": unit["title"],
+            "lessonId": lesson_id,
+            "totalLessons": total_lessons,
+            "words": lesson_words,
+            "grammar": unit.get("grammar", {}),
+            "taskTypes": unit.get("taskTypes", []),
+        })
+
+    @app.route('/api/units/<unit_id>/grammar', methods=['GET'])
+    def get_unit_grammar(unit_id):
+        """Return grammar rules for a unit."""
+        data = load_data()
+        unit = next((u for u in data.get('units', []) if u['id'] == unit_id), None)
+        if not unit:
+            return jsonify({"error": "Unit not found"}), 404
+        return jsonify(unit.get("grammar", {}))
+
+    @app.route('/api/task-types', methods=['GET'])
+    def get_task_types():
+        """Return all 10 task type definitions."""
+        data = load_data()
+        return jsonify(data.get("taskTypes", []))
+
+    @app.route('/api/situations', methods=['GET'])
+    def get_situations():
+        """Return all 7 dialogue situations."""
+        data = load_data()
+        return jsonify(data.get("situations", []))
+
+    @app.route('/api/grammar/search', methods=['GET'])
+    def search_grammar():
+        """Search grammar rules in Hungarian and English."""
+        q = request.args.get('q', '').lower().strip()
+        if not q or len(q) < 2:
+            return jsonify([])
+
+        data = load_data()
+        results = []
+        for unit in data.get('units', []):
+            grammar = unit.get('grammar', {})
+            searchable = ' '.join([
+                unit.get('title', ''),
+                unit.get('titleEn', ''),
+                grammar.get('ruleBasic', ''),
+                grammar.get('ruleExtra', ''),
+            ]).lower()
+
+            if q in searchable:
+                results.append({
+                    "unitId": unit["id"],
+                    "unitTitle": unit["title"],
+                    "grammar": grammar,
+                })
+        return jsonify(results)
+
+    @app.route('/api/vocabulary', methods=['GET'])
+    def get_all_vocabulary():
+        """Return all vocabulary with optional filters."""
+        data = load_data()
+        unit_filter = request.args.get('unit')
+        search = request.args.get('q', '').lower().strip()
+
+        all_words = []
+        for unit in data.get('units', []):
+            if unit_filter and unit['id'] != unit_filter:
+                continue
+            for w in unit['words']:
+                if search and search not in w['word'].lower() and search not in w['hungarian'].lower():
+                    continue
+                all_words.append({
+                    "id": w["id"],
+                    "word": w["word"],
+                    "hungarian": w["hungarian"],
+                    "pos": w["pos"],
+                    "unitId": unit["id"],
+                    "unitTitle": unit["title"],
+                })
+
+        sort_by = request.args.get('sort', 'alpha')
+        if sort_by == 'alpha':
+            all_words.sort(key=lambda w: w['word'].lower())
+        elif sort_by == 'unit':
+            all_words.sort(key=lambda w: w['unitId'])
+
+        return jsonify(all_words)
 
 
 # Create app instance for gunicorn

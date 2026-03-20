@@ -84,3 +84,89 @@ export const fetchDialogues = async (chapterId: number): Promise<DialogueData[]>
   if (!res.ok) throw new Error("Failed to fetch dialogues");
   return res.json();
 };
+
+// --- V4 Unit-based API ---
+
+export interface UnitData {
+  id: string;
+  part: number;
+  order: number;
+  title: string;
+  titleEn: string;
+  color: string;
+  grammarFocus: string;
+  wordCount: number;
+}
+
+export interface UnitDetail extends UnitData {
+  grammar: GrammarData;
+  taskTypes: TaskTypeData[];
+  words: WordData[];
+}
+
+export interface GrammarData {
+  ruleBasic: string;
+  ruleExtra: string;
+  examples: { en: string; hu: string }[];
+}
+
+export interface TaskTypeData {
+  id: number;
+  name: string;
+  nameEn: string;
+  type: string;
+  color: string;
+}
+
+export interface UnitLessonData {
+  unitId: string;
+  unitTitle: string;
+  lessonId: number;
+  totalLessons: number;
+  words: WordData[];
+  grammar: GrammarData;
+  taskTypes: TaskTypeData[];
+}
+
+export interface VocabularyItem {
+  id: number;
+  word: string;
+  hungarian: string;
+  pos: string;
+  unitId: string;
+  unitTitle: string;
+}
+
+export const fetchUnits = async (): Promise<UnitData[]> => {
+  const res = await fetch(`${API_BASE}/units`);
+  if (!res.ok) throw new Error("Failed to fetch units");
+  return res.json();
+};
+
+export const fetchUnit = async (unitId: string): Promise<UnitDetail> => {
+  const res = await fetch(`${API_BASE}/units/${unitId}`);
+  if (!res.ok) throw new Error("Failed to fetch unit");
+  return res.json();
+};
+
+export const fetchUnitLesson = async (unitId: string, lessonId: number): Promise<UnitLessonData> => {
+  const res = await fetch(`${API_BASE}/units/${unitId}/lesson/${lessonId}`);
+  if (!res.ok) throw new Error("Failed to fetch unit lesson");
+  return res.json();
+};
+
+export const fetchGrammarSearch = async (query: string): Promise<{ unitId: string; unitTitle: string; grammar: GrammarData }[]> => {
+  const res = await fetch(`${API_BASE}/grammar/search?q=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error("Failed to search grammar");
+  return res.json();
+};
+
+export const fetchVocabulary = async (params?: { unit?: string; q?: string; sort?: string }): Promise<VocabularyItem[]> => {
+  const searchParams = new URLSearchParams();
+  if (params?.unit) searchParams.set('unit', params.unit);
+  if (params?.q) searchParams.set('q', params.q);
+  if (params?.sort) searchParams.set('sort', params.sort);
+  const res = await fetch(`${API_BASE}/vocabulary?${searchParams.toString()}`);
+  if (!res.ok) throw new Error("Failed to fetch vocabulary");
+  return res.json();
+};

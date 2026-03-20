@@ -101,6 +101,20 @@ export const getErrorWords = (): Record<number, number> => {
   return loadProgress().errorDict;
 };
 
+/** Get list of completed unit IDs (V4). */
+export const getCompletedUnits = (): string[] => {
+  const data = loadProgress();
+  const completedUnits = new Set<string>();
+  // Check lessons stored with unitId format (e.g. "1A-1", "2B-3")
+  for (const key of Object.keys(data.lessons)) {
+    const parts = key.split("-");
+    if (parts.length >= 2 && /^[1-5][A-E]$/.test(parts[0])) {
+      completedUnits.add(parts[0]);
+    }
+  }
+  return Array.from(completedUnits);
+};
+
 /** Fetch server-side progress and merge with local data. */
 export const syncProgressFromServer = async (): Promise<void> => {
   if (!getAccessToken()) return;
