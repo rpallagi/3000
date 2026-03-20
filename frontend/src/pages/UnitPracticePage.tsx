@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
@@ -54,9 +54,23 @@ interface TaskItem {
   word?: WordData;
 }
 
+// Map task IDs to V4TaskType
+const TASK_ID_MAP: Record<number, V4TaskType> = {
+  2: "quiz",
+  3: "typing",
+  4: "grammar",
+  5: "sentence",
+  6: "fill",
+  7: "twoOption",
+  8: "dialogue",
+  9: "speaking",
+  10: "activity",
+};
+
 const UnitPracticePage = () => {
   const { unitId, lessonId } = useParams<{ unitId: string; lessonId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [lesson, setLesson] = useState<UnitLessonData | null>(null);
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -77,53 +91,56 @@ const UnitPracticePage = () => {
   }, [unitId, lessonId]);
 
   const buildTaskSequence = (data: UnitLessonData) => {
-    const taskList: TaskItem[] = [];
     const words = data.words;
-
-    // Task 2: Vocabulary Quiz — all words
-    for (const word of words.slice(0, 4)) {
-      taskList.push({ type: "quiz", word });
-    }
-
-    // Task 3: Typing (Wordle) — first 2-3 words
-    for (const word of words.slice(0, 3)) {
-      taskList.push({ type: "typing", word });
-    }
-
-    // Task 4: Grammar explanation (once per lesson)
-    if (data.grammar?.ruleBasic) {
-      taskList.push({ type: "grammar" });
-    }
-
-    // Task 5: Sentence building — words with sentences
     const wordsWithSentences = words.filter((w) => w.sentences?.length);
-    for (const word of wordsWithSentences.slice(0, 3)) {
-      taskList.push({ type: "sentence", word });
-    }
 
-    // Task 6: Fill in the gap
-    for (const word of wordsWithSentences.slice(0, 2)) {
-      taskList.push({ type: "fill", word });
-    }
+    // Check if a specific task type was requested via ?startTask=N
+    const startTaskId = Number(searchParams.get("startTask") || 0);
+    const singleTaskType = startTaskId > 0 ? TASK_ID_MAP[startTaskId] : null;
 
-    // Task 7: Two options
-    for (const word of words.slice(0, 3)) {
-      taskList.push({ type: "twoOption", word });
-    }
+    const addTasksForType = (type: V4TaskType, list: TaskItem[]) => {
+      switch (type) {
+        case "quiz":
+          for (const word of words.slice(0, 5)) list.push({ type: "quiz", word });
+          break;
+        case "typing":
+          for (const word of words.slice(0, 4)) list.push({ type: "typing", word });
+          break;
+        case "grammar":
+          if (data.grammar?.ruleBasic) list.push({ type: "grammar" });
+          break;
+        case "sentence":
+          for (const word of wordsWithSentences.slice(0, 4)) list.push({ type: "sentence", word });
+          break;
+        case "fill":
+          for (const word of wordsWithSentences.slice(0, 4)) list.push({ type: "fill", word });
+          break;
+        case "twoOption":
+          for (const word of words.slice(0, 4)) list.push({ type: "twoOption", word });
+          break;
+        case "dialogue":
+          if (wordsWithSentences.length > 0) list.push({ type: "dialogue", word: wordsWithSentences[0] });
+          break;
+        case "speaking":
+          for (const word of words.slice(0, 3)) list.push({ type: "speaking", word });
+          break;
+        case "activity":
+          if (words.length > 0) list.push({ type: "activity", word: words[Math.floor(Math.random() * words.length)] });
+          break;
+      }
+    };
 
-    // Task 8: Dialogue (reuse existing)
-    if (wordsWithSentences.length > 0) {
-      taskList.push({ type: "dialogue", word: wordsWithSentences[0] });
-    }
+    const taskList: TaskItem[] = [];
 
-    // Task 9: Speaking
-    for (const word of words.slice(0, 2)) {
-      taskList.push({ type: "speaking", word });
-    }
-
-    // Task 10: Activity
-    if (words.length > 0) {
-      taskList.push({ type: "activity", word: words[Math.floor(Math.random() * words.length)] });
+    if (singleTaskType) {
+      // Only build tasks for the requested type
+      addTasksForType(singleTaskType, taskList);
+    } else {
+      // Full lesson flow: all 10 task types in sequence
+      const allTypes: V4TaskType[] = ["quiz", "typing", "grammar", "sentence", "fill", "twoOption", "dialogue", "speaking", "activity"];
+      for (const type of allTypes) {
+        addTasksForType(type, taskList);
+      }
     }
 
     setTasks(taskList);

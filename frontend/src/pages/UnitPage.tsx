@@ -160,7 +160,15 @@ const UnitPage = () => {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
-                onClick={() => navigate(`/unit/${unit.id}/lesson/1?task=${task.id}`)}
+                onClick={() => {
+                  if (task.id === 1) {
+                    // Task 1: Szókincs bemutatás → vocabulary intro page
+                    navigate(`/unit/${unit.id}/lesson/1`);
+                  } else {
+                    // Tasks 2-10: practice page starting at specific task type
+                    navigate(`/unit/${unit.id}/lesson/1/practice?startTask=${task.id}`);
+                  }
+                }}
                 className="w-full bg-card rounded-xl border border-border p-4 flex items-center gap-3 text-left
                   hover:border-foreground/20 transition-all active:scale-[0.98]"
                 style={{
