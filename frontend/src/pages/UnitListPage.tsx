@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import { fetchUnits, UnitData } from "@/utils/api";
-import { getCompletedUnits, getStreak, getTotalLearnedWords, getTotalCompletedTasks } from "@/utils/progress";
+import { getCompletedUnits, getStreak, getTotalLearnedWords, getTotalCompletedTasks, getUnitProgress } from "@/utils/progress";
 import { getDueCount } from "@/utils/sm2";
 import { getUserLevel, getBenchmarkPercentile, getStarDisplay } from "@/utils/levels";
 import { hasOnboarded } from "@/pages/OnboardingPage";
@@ -151,17 +151,23 @@ const UnitListPage = () => {
         </div>
 
         {/* Smart Resume — Folytatás gomb */}
-        {completedUnits.length > 0 && completedUnits.length < units.length && (() => {
-          // Find next uncompleted unit
-          const nextUnit = units.find((u) => !completedUnits.includes(u.id));
+        {(() => {
+          // Find next uncompleted unit or the first unit
+          const nextUnit = units.find((u) => !completedUnits.includes(u.id)) || units[0];
           if (!nextUnit) return null;
+          const unitProgress = getUnitProgress(nextUnit.id);
+          const nextLesson = unitProgress.completedLessons + 1;
           return (
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => navigate(`/unit/${nextUnit.id}`)}
+              onClick={() => navigate(
+                unitProgress.completedLessons > 0
+                  ? `/unit/${nextUnit.id}/lesson/${nextLesson}/practice`
+                  : `/unit/${nextUnit.id}/lesson/1`
+              )}
               className="w-full bg-card rounded-2xl border border-border p-4 flex items-center gap-3 text-left mb-6 hover:border-foreground/20 transition-all"
               style={{ boxShadow: "var(--card-shadow)" }}
             >
@@ -172,7 +178,12 @@ const UnitListPage = () => {
                 <p className="text-sm font-semibold text-foreground">
                   Folytatás: {nextUnit.id} — {nextUnit.title}
                 </p>
-                <p className="text-xs text-muted-foreground">{nextUnit.wordCount} szó</p>
+                <p className="text-xs text-muted-foreground">
+                  {unitProgress.completedLessons > 0
+                    ? `${unitProgress.completedLessons}. lecke kész`
+                    : `${nextUnit.wordCount} szó`
+                  }
+                </p>
               </div>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 flex-shrink-0 ml-auto"><path d="m9 18 6-6-6-6"/></svg>
             </motion.button>

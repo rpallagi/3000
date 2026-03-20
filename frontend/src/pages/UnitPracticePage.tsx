@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
-import { fetchUnitLesson, UnitLessonData, WordData } from "@/utils/api";
+import { fetchUnitLesson, fetchUnitDialogue, UnitLessonData, WordData } from "@/utils/api";
 import { saveLessonResult } from "@/utils/progress";
 
 // Task components
@@ -83,14 +83,18 @@ const UnitPracticePage = () => {
   const [scores, setScores] = useState<number[]>([]);
   const [errors, setErrors] = useState<{ wordId: number; word: string }[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [dialogueData, setDialogueData] = useState<{ id: number; turns: string[][] } | null>(null);
   const taskStartTime = useRef<number>(Date.now());
 
   useEffect(() => {
     if (!unitId || !lessonId) return;
 
-    fetchUnitLesson(unitId, Number(lessonId))
-      .then((data) => {
+    Promise.all([
+      fetchUnitLesson(unitId, Number(lessonId)),
+      fetchUnitDialogue(unitId),
+    ]).then(([data, dialogue]) => {
         setLesson(data);
+        setDialogueData(dialogue);
         buildTaskSequence(data);
       })
       .finally(() => setLoading(false));
@@ -359,13 +363,11 @@ const UnitPracticePage = () => {
             {task.type === "twoOption" && task.word && (
               <TwoOptionTask word={task.word} onComplete={handleTaskComplete} />
             )}
-            {task.type === "dialogue" && task.word && (
+            {task.type === "dialogue" && dialogueData && (
               <DialogueTask
                 dialogue={{
-                  id: 0,
-                  turns: task.word.sentences?.length
-                    ? parseDialogueTurns([[task.word.sentences[0].en, task.word.sentences[0].hu]])
-                    : [],
+                  id: dialogueData.id,
+                  turns: parseDialogueTurns(dialogueData.turns),
                 }}
                 onComplete={(s) => handleTaskComplete(s, false)}
               />

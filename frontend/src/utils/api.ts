@@ -155,6 +155,13 @@ export const fetchUnitLesson = async (unitId: string, lessonId: number): Promise
   return res.json();
 };
 
+export const fetchUnitDialogue = async (unitId: string): Promise<{ id: number; turns: string[][] } | null> => {
+  const res = await fetch(`${API_BASE}/units/${unitId}/dialogue`);
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data;
+};
+
 export const fetchGrammarSearch = async (query: string): Promise<{ unitId: string; unitTitle: string; grammar: GrammarData }[]> => {
   const res = await fetch(`${API_BASE}/grammar/search?q=${encodeURIComponent(query)}`);
   if (!res.ok) throw new Error("Failed to search grammar");

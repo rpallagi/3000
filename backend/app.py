@@ -312,6 +312,22 @@ def register_unit_routes(app):
         data = load_data()
         return jsonify(data.get("situations", []))
 
+    @app.route('/api/units/<unit_id>/dialogue', methods=['GET'])
+    def get_unit_dialogue(unit_id):
+        """Return a dialogue for this unit.
+        Maps units to dialogues: skip scoring dialogue (id=1),
+        then distribute remaining 30 dialogues across 20 units."""
+        data = load_data()
+        dialogues = [d for d in data.get('dialogues', []) if d.get('id', 0) > 1]
+        if not dialogues:
+            return jsonify(None)
+
+        units = data.get('units', [])
+        unit_index = next((i for i, u in enumerate(units) if u['id'] == unit_id), 0)
+        # Cycle through available dialogues
+        dialogue = dialogues[unit_index % len(dialogues)]
+        return jsonify(dialogue)
+
     @app.route('/api/grammar/search', methods=['GET'])
     def search_grammar():
         """Search grammar rules in Hungarian and English."""
