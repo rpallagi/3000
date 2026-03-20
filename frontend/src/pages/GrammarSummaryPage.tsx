@@ -108,17 +108,22 @@ const GrammarSummaryPage = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-card rounded-2xl border border-border overflow-hidden"
-                  style={{ borderLeftWidth: 4, borderLeftColor: borderColor, boxShadow: "var(--card-shadow)" }}
+                  style={{ boxShadow: "var(--card-shadow)" }}
                 >
                   {/* Header — clickable */}
                   <button
                     onClick={() => setExpandedUnit(isExpanded ? null : unit.id)}
-                    className="w-full p-4 flex items-center justify-between text-left hover:bg-primary/5 transition-colors"
+                    className="w-full p-4 flex items-center justify-between text-left hover:border-foreground/20 transition-colors"
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-md text-white" style={{ background: borderColor }}>
-                        {unit.id}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${borderColor}20` }}
+                      >
+                        <span className="text-xs font-bold text-white px-1.5 py-0.5 rounded-md" style={{ background: borderColor, fontSize: 11 }}>
+                          {unit.id}
+                        </span>
+                      </div>
                       <span className="text-sm font-medium text-foreground">{unit.title}</span>
                     </div>
                     <motion.span

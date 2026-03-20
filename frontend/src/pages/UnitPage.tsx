@@ -95,7 +95,7 @@ const UnitPage = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-card rounded-2xl border border-border p-5 mb-6"
-            style={{ borderLeftWidth: 4, borderLeftColor: "#4CAF50", boxShadow: "var(--card-shadow)" }}
+            style={{ boxShadow: "var(--card-shadow)" }}
           >
             <h3 className="text-sm font-medium text-muted-foreground tracking-widest uppercase mb-3">
               Nyelvtani szabály
@@ -169,17 +169,18 @@ const UnitPage = () => {
                     navigate(`/unit/${unit.id}/lesson/1/practice?startTask=${task.id}`);
                   }
                 }}
-                className="w-full bg-card rounded-xl border border-border p-4 flex items-center gap-3 text-left
+                className="w-full bg-card rounded-2xl border border-border p-4 flex items-center gap-3 text-left
                   hover:border-foreground/20 transition-all active:scale-[0.98]"
-                style={{
-                  borderLeftWidth: 3,
-                  borderLeftColor: taskColor,
-                  boxShadow: "var(--card-shadow)",
-                }}
+                style={{ boxShadow: "var(--card-shadow)" }}
               >
-                <span className="text-sm font-medium text-muted-foreground w-6">{task.id}.</span>
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${taskColor}20` }}
+                >
+                  <span className="text-xs font-bold" style={{ color: taskColor }}>{task.id}</span>
+                </div>
                 <span className="text-sm font-medium text-foreground flex-1">{task.name}</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={taskColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><path d="m9 18 6-6-6-6"/></svg>
               </motion.button>
             );
           })}

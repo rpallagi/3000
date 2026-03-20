@@ -105,10 +105,10 @@ const UnitListPage = () => {
               Gyorsabban haladsz, mint a tanulók {benchmark}%-a!
             </p>
           )}
-          <div className="w-full h-2 bg-secondary rounded-full">
+          <div className="w-full h-1.5 bg-secondary rounded-full mt-2">
             <motion.div
               className="h-full rounded-full"
-              style={{ background: "linear-gradient(90deg, #4CAF50, #E91E63)" }}
+              style={{ background: "#4CAF50" }}
               animate={{ width: `${totalWords > 0 ? (learnedWords / totalWords) * 100 : 0}%` }}
               transition={{ duration: 0.6 }}
             />
@@ -133,12 +133,18 @@ const UnitListPage = () => {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate("/review")}
-              className="flex-1 bg-card rounded-2xl border border-border p-4 flex items-center gap-3 text-left hover:border-primary/30 transition-all"
-              style={{ boxShadow: "var(--card-shadow)", borderLeftWidth: 3, borderLeftColor: "#E91E63" }}
+              className="flex-1 bg-card rounded-2xl border border-border p-4 flex items-center gap-3 text-left hover:border-foreground/20 transition-all"
+              style={{ boxShadow: "var(--card-shadow)" }}
             >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#E91E6320" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E91E63" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" />
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" />
+                </svg>
+              </div>
               <div>
-                <p className="text-lg font-bold" style={{ color: "#E91E63" }}>{dueCount}</p>
-                <p className="text-[10px] text-muted-foreground">szó ismétlésre vár</p>
+                <p className="text-sm font-medium text-foreground">{dueCount} szó ismétlésre vár</p>
+                <p className="text-[10px] text-muted-foreground">Indítsd el a napi ismétlést</p>
               </div>
             </motion.button>
           )}
@@ -156,7 +162,7 @@ const UnitListPage = () => {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate(`/unit/${nextUnit.id}`)}
-              className="w-full bg-gradient-to-r from-green-500/10 to-pink-500/10 border border-green-500/20 rounded-2xl p-4 flex items-center gap-3 text-left mb-6 hover:border-green-500/40 transition-colors"
+              className="w-full bg-card rounded-2xl border border-border p-4 flex items-center gap-3 text-left mb-6 hover:border-foreground/20 transition-all"
               style={{ boxShadow: "var(--card-shadow)" }}
             >
               <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#4CAF5020" }}>
@@ -182,7 +188,7 @@ const UnitListPage = () => {
             <div className="flex flex-col gap-3">
               {partUnits.map((unit, i) => {
                 const isCompleted = completedUnits.includes(unit.id);
-                const borderColor = COLOR_MAP[unit.color] || "#4CAF50";
+                const unitColor = COLOR_MAP[unit.color] || "#4CAF50";
 
                 return (
                   <motion.button
@@ -191,26 +197,24 @@ const UnitListPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                     onClick={() => navigate(`/unit/${unit.id}`)}
-                    className="w-full bg-card rounded-2xl border border-border p-4 sm:p-5 flex items-center gap-4 text-left
-                      hover:border-foreground/20 transition-all active:scale-[0.98]"
-                    style={{
-                      borderLeftWidth: 4,
-                      borderLeftColor: borderColor,
-                      boxShadow: "var(--card-shadow)",
-                    }}
+                    className="w-full bg-card rounded-2xl border border-border p-4 flex items-center gap-3 text-left hover:border-foreground/20 transition-all active:scale-[0.98]"
+                    style={{ boxShadow: "var(--card-shadow)" }}
                   >
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: `${unitColor}20` }}
+                    >
+                      <span
+                        className="text-xs font-bold text-white px-1.5 py-0.5 rounded-md"
+                        style={{ background: unitColor, fontSize: 11 }}
+                      >
+                        {unit.id}
+                      </span>
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className="text-xs font-bold px-2 py-0.5 rounded-md text-white"
-                          style={{ background: borderColor }}
-                        >
-                          {unit.id}
-                        </span>
-                        <span className="text-sm font-semibold text-foreground truncate">
-                          {unit.title}
-                        </span>
-                      </div>
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {unit.title}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {unit.wordCount} szó
                       </p>

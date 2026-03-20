@@ -25,7 +25,7 @@ const Header = () => {
           className="flex items-center gap-1.5 text-lg sm:text-xl font-semibold text-foreground tracking-tight hover:opacity-80 transition-opacity"
         >
           <img src="/owl-logo.svg" alt="" className="w-7 h-7 sm:w-8 sm:h-8" />
-          <span style={{ color: "#4CAF50" }}>Play</span><span className="font-bold">ENG</span>
+          <span style={{ color: "#4CAF50" }}>play</span><span className="font-bold" style={{ color: "#E91E63" }}>ENG</span>
         </button>
         <nav className="flex items-center gap-1 sm:gap-2">
           {/* Sound/Silent mode toggle */}
