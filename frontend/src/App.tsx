@@ -26,6 +26,7 @@ import UnitPage from "./pages/UnitPage.tsx";
 import UnitLessonPage from "./pages/UnitLessonPage.tsx";
 import UnitPracticePage from "./pages/UnitPracticePage.tsx";
 import UnitTestPage from "./pages/UnitTestPage.tsx";
+import LevelTestPage from "./pages/LevelTestPage.tsx";
 import OnboardingPage from "./pages/OnboardingPage.tsx";
 import ReviewPage from "./pages/ReviewPage.tsx";
 import VocabularyPage from "./pages/VocabularyPage.tsx";
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="/unit/:unitId/lesson/:lessonId" element={<UnitLessonPage />} />
               <Route path="/unit/:unitId/lesson/:lessonId/practice" element={<UnitPracticePage />} />
               <Route path="/unit/:unitId/test" element={<UnitTestPage />} />
+              <Route path="/level-test" element={<LevelTestPage />} />
               {/* V4 shared pages */}
               <Route path="/review" element={<ReviewPage />} />
               <Route path="/vocabulary" element={<VocabularyPage />} />

@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import { fetchUnits, UnitData } from "@/utils/api";
 import { getCompletedUnits, getStreak, getTotalLearnedWords, getTotalCompletedTasks } from "@/utils/progress";
 import { getDueCount } from "@/utils/sm2";
+import { getUserLevel, getBenchmarkPercentile, getStarDisplay } from "@/utils/levels";
 
 const COLOR_MAP: Record<string, string> = {
   pink: "#E91E63",
@@ -64,6 +65,8 @@ const UnitListPage = () => {
     return sum + (u?.wordCount || 0);
   }, 0);
   const completedTasks = getTotalCompletedTasks();
+  const userLevel = getUserLevel(Object.keys(completedUnits).length);
+  const benchmark = getBenchmarkPercentile(learnedWords, streak);
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,8 +85,17 @@ const UnitListPage = () => {
             {learnedWords} szót tanultál
           </h1>
           {completedTasks > 0 && (
-            <p className="text-sm text-muted-foreground mb-2">
+            <p className="text-sm text-muted-foreground mb-1">
               {completedTasks} feladat kész
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            {getStarDisplay(userLevel.stars)} {userLevel.name}
+            {userLevel.nextLevelIn > 0 && ` — Még ${userLevel.nextLevelIn} lecke a következő szintig`}
+          </p>
+          {learnedWords > 0 && (
+            <p className="text-[10px] mt-1" style={{ color: "#4CAF50" }}>
+              Gyorsabban haladsz, mint a tanulók {benchmark}%-a!
             </p>
           )}
           <div className="w-full h-2 bg-secondary rounded-full">

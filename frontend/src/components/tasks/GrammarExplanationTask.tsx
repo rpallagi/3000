@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { GrammarData } from "@/utils/api";
+import BookModal from "@/components/BookModal";
 
 interface Props {
   grammar: GrammarData;
@@ -10,6 +11,7 @@ interface Props {
 
 const GrammarExplanationTask = ({ grammar, unitId, onComplete }: Props) => {
   const [showExtra, setShowExtra] = useState(false);
+  const [showBook, setShowBook] = useState(false);
 
   return (
     <div className="flex flex-col gap-5">
@@ -79,16 +81,38 @@ const GrammarExplanationTask = ({ grammar, unitId, onComplete }: Props) => {
         </motion.button>
       )}
 
+      {/* Book mode button */}
+      <motion.button
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => setShowBook(true)}
+        className="w-full py-3.5 rounded-2xl font-medium text-center border-2 transition-colors flex items-center justify-center gap-2"
+        style={{ borderColor: "#4CAF50", color: "#4CAF50" }}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg>
+        Könyv mód
+      </motion.button>
+
       {/* Continue button */}
       <motion.button
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => onComplete(8, false)}
-        className="w-full py-4 rounded-2xl font-medium text-white text-center mt-2"
+        className="w-full py-4 rounded-2xl font-medium text-white text-center"
         style={{ background: "#4CAF50" }}
       >
         Megértettem
       </motion.button>
+
+      <BookModal
+        isOpen={showBook}
+        onClose={() => setShowBook(false)}
+        unitId={unitId}
+        title="Nyelvtani szabály"
+      />
     </div>
   );
 };

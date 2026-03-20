@@ -60,7 +60,7 @@ const OnboardingPage = () => {
       // Save onboarding complete + selected timing
       setOnboarded();
       localStorage.setItem("playeng_daily_minutes", String([5, 10, 20][selectedTiming]));
-      navigate("/");
+      navigate("/level-test");
     }
   };
 
