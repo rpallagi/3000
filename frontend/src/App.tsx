@@ -25,6 +25,11 @@ import UnitListPage from "./pages/UnitListPage.tsx";
 import UnitPage from "./pages/UnitPage.tsx";
 import UnitLessonPage from "./pages/UnitLessonPage.tsx";
 import UnitPracticePage from "./pages/UnitPracticePage.tsx";
+import OnboardingPage from "./pages/OnboardingPage.tsx";
+import ReviewPage from "./pages/ReviewPage.tsx";
+import VocabularyPage from "./pages/VocabularyPage.tsx";
+import ProfilePage from "./pages/ProfilePage.tsx";
+import BottomNav from "./components/BottomNav.tsx";
 
 const queryClient = new QueryClient();
 
@@ -39,26 +44,33 @@ const App = () => (
             <Routes>
               <Route path="/" element={<UnitListPage />} />
               <Route path="/home" element={<Index />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/subscription" element={<SubscriptionPage />} />
               <Route path="/tutor" element={<TutorPage />} />
+              {/* Legacy chapter-based routes */}
               <Route path="/level/:levelId" element={<LevelPage />} />
               <Route path="/chapter/:chapterId" element={<ChapterPage />} />
               <Route path="/chapter/:chapterId/lesson/:lessonId" element={<LessonPage />} />
               <Route path="/chapter/:chapterId/lesson/:lessonId/practice" element={<PracticePage />} />
               <Route path="/chapter/:chapterId/test" element={<ChapterTestPage />} />
-              <Route path="/error-dictionary" element={<ErrorDictionaryPage />} />
-              <Route path="/daily" element={<DailyChallengePage />} />
-              <Route path="/weak-words-practice" element={<WeakWordsPracticePage />} />
               {/* V4 unit-based routes */}
               <Route path="/units" element={<UnitListPage />} />
               <Route path="/unit/:unitId" element={<UnitPage />} />
               <Route path="/unit/:unitId/lesson/:lessonId" element={<UnitLessonPage />} />
               <Route path="/unit/:unitId/lesson/:lessonId/practice" element={<UnitPracticePage />} />
+              {/* V4 shared pages */}
+              <Route path="/review" element={<ReviewPage />} />
+              <Route path="/vocabulary" element={<VocabularyPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/error-dictionary" element={<ErrorDictionaryPage />} />
+              <Route path="/daily" element={<DailyChallengePage />} />
+              <Route path="/weak-words-practice" element={<WeakWordsPracticePage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <BottomNav />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

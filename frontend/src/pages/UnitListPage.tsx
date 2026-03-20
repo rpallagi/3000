@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import { fetchUnits, UnitData } from "@/utils/api";
-import { getCompletedUnits } from "@/utils/progress";
+import { getCompletedUnits, getStreak } from "@/utils/progress";
+import { getDueCount } from "@/utils/sm2";
 
 const COLOR_MAP: Record<string, string> = {
   pink: "#E91E63",
@@ -25,6 +26,8 @@ const UnitListPage = () => {
   const [units, setUnits] = useState<UnitData[]>([]);
   const [loading, setLoading] = useState(true);
   const completedUnits = getCompletedUnits();
+  const streak = getStreak();
+  const dueCount = getDueCount();
 
   useEffect(() => {
     fetchUnits()
@@ -86,6 +89,35 @@ const UnitListPage = () => {
             />
           </div>
         </motion.div>
+
+        {/* Streak + Review banner */}
+        <div className="flex gap-3 mb-6">
+          {streak > 0 && (
+            <div className="flex-1 bg-card rounded-2xl border border-border p-4 flex items-center gap-3" style={{ boxShadow: "var(--card-shadow)" }}>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#FF980020" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF9800" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground">{streak} nap</p>
+                <p className="text-[10px] text-muted-foreground">sorozat</p>
+              </div>
+            </div>
+          )}
+          {dueCount > 0 && (
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/review")}
+              className="flex-1 bg-card rounded-2xl border border-border p-4 flex items-center gap-3 text-left hover:border-primary/30 transition-all"
+              style={{ boxShadow: "var(--card-shadow)", borderLeftWidth: 3, borderLeftColor: "#E91E63" }}
+            >
+              <div>
+                <p className="text-lg font-bold" style={{ color: "#E91E63" }}>{dueCount}</p>
+                <p className="text-[10px] text-muted-foreground">szó ismétlésre vár</p>
+              </div>
+            </motion.button>
+          )}
+        </div>
 
         {/* Units by part */}
         {Array.from(parts.entries()).map(([part, partUnits]) => (

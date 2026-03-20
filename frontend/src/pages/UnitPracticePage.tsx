@@ -17,6 +17,7 @@ import DialogueTask, { parseDialogueTurns } from "@/components/tasks/DialogueTas
 import PronunciationTask from "@/components/tasks/PronunciationTask";
 import ActivityTask from "@/components/tasks/ActivityTask";
 import ResultsScreen from "@/components/tasks/ResultsScreen";
+import { addToReview } from "@/utils/sm2";
 
 // V4 PlayENG method — 10 task types per unit
 // Flow: vocab intro (done in UnitLessonPage) → quiz → typing → grammar → sentence builder
@@ -134,6 +135,10 @@ const UnitPracticePage = () => {
       if (isError && tasks[currentTaskIndex]?.word) {
         const w = tasks[currentTaskIndex].word!;
         setErrors((prev) => [...prev, { wordId: w.id, word: w.word }]);
+        // Add to SM-2 review system
+        if (lesson) {
+          addToReview(w.id, w.word, lesson.unitId);
+        }
       }
 
       if (currentTaskIndex < tasks.length - 1) {
