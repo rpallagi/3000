@@ -261,3 +261,110 @@ A Tananyag Útmutató szerint:
 - Az oxford3000.json struktúra VÁLTOZIK (23 fejezet → 20 egység)
 - A design a prototípus (PlayENG_Prototype.html) alapján készül
 - Greta döntései: nem XP hanem szavak száma, narancssárga kulcsszó, Wordle begépelés, SM-2, 3 körös teljes→összevont alak
+
+---
+
+## KIEGÉSZÍTÉS — Dev branch + prototípus elemzés (2026-03-20)
+
+### A prototípusból (PlayENG_Prototype.html) közvetlenül használható referenciák:
+
+**1. Onboarding flow (3 képernyő):**
+- Splash screen → "PlayENG" logo + "Magyar fejjel, angol nyelven."
+- 1. lépés: "Magyaroknak fejlesztett módszer" / "Megtanulsz beszélni" / "Anyanyelvi oktatóval"
+- 2. lépés: "Megérted → Gyakorlod → Beszélsz" (1-2-3 kártya)
+- 3. lépés: Tempó választás: ☕5 perc (~18 hó) / 📚10 perc (~11 hó) / 🚀20 perc (~6 hó)
+
+**2. Feladat lista képernyő (task-list-screen):**
+- Színkódolt border-left: pink(vocab), zöld(grammar), kék(communication), narancs(activity)
+- 10 feladat kártyák számozva (1-10)
+- "Összes feladat indítása →" gomb alul
+- Progress: "0/10" jobb felül
+
+**3. Begépelés (Wordle-stílus) logika:**
+- `typing-box` class, 48×56px négyzetek
+- On-screen QWERTY billentyűzet (A-Z, 26 gomb)
+- Betűnkénti validáció: ha helyes → `.filled` class (zöld)
+- Ha teljes szó kész → "Helyes! 🎉" → 1500ms delay → következő szó
+
+**4. Nyelvtani magyarázat UI:**
+- `.grammar-rule` kártya: ALAPSZABÁLY (mindig látható)
+- `.exception-box` lenyitható (onclick toggle `.expanded`)
+- "📖 Könyv mód" gomb → modal (#bookModal)
+- "Megértettem →" gomb (outlined, zöld szegély)
+
+**5. Két opció választás:**
+- 2 gomb (helyes/helytelen)
+- Hibás → `.wrong` class + feedback box "💡 Helyes válasz:"
+- Helyes → `.correct` class → 1500ms delay → következő
+
+**6. Párbeszéd:**
+- Szituáció header (pl. "🏪 Boltban")
+- Beszélő neve + szöveg buborékban
+- 3 opció (1 helyes, 1 magyar hiba minta, 1 nyelvtani hiba)
+
+**7. Speaking:**
+- "🎤 Mondd ki!" fejléc
+- Mikrofon gomb
+- Csillag értékelés (★★★★☆)
+
+**8. Activity:**
+- Riddle szöveg ("It is a fruit. It is red or green.")
+- Wordle begépelés a válaszhoz
+
+**9. Befejezés képernyő:**
+- "Szép munka!" + 🎉🦉
+- Stats: Feladatok (10/10), Helyes (8/10), Szavak (6 megtanult), Idő (4 perc 32s)
+- Streak badge: "🔥 1. nap — Holnap is jössz?"
+- Achievement: "Gyorsabban haladsz, mint a tanulók 68%-a!"
+- Csillag értékelés
+
+### Dev CLAUDE.md-ből — extra infók ami a main-ben NINCS:
+
+**Git workflow (Greta+Roland):**
+- Greta → dev branch (SOHA main)
+- Roland → dev review → main merge → deploy
+- Session-ök: `docs/cowork-DÁTUM/` mappába mentés
+- SESSION_SUMMARY.md minden session végén
+
+**Tartalom CEFR lefedettség:**
+- A1: ~149% (túlteljesítve)
+- A2: ~53% (részleges — nyelvtan hiányos)
+- B1: ~10-15% (nem támogatott, jövőbeli fázis)
+
+**Elsajátítási idő:**
+- Összesen: 130–185 óra aktív tanulás
+- Napi 5 perc → ~18 hónap
+- Napi 10 perc → ~11 hónap
+- Napi 20 perc → ~6 hónap
+
+**Tananyag javítások (session döntések):**
+- 1A: a/an gyakorló főnévlista (university!, hour!)
+- 1C: megjelenés/személyiség → áthelyezve 3D-be
+- 4C: gyakorisági határozószók → áthelyezve 2E-be
+- 4D: hiányzott, visszaadva (Food/Drinks)
+- 12 feladattípus → 10 (összevonások történtek)
+- 114 Oxford szókapcsolat külön szűrővel kezelendő
+
+**Design részletek:**
+- "fejlesztettük" (MI) — nem "fejlesztették" (ŐK) nyelvezet
+- "4× gyorsabb fejlődés" marketing szöveg
+- Bottom nav (prototípus): Tanulás | Statisztika | Profilom
+- Egység végi teszt: 80% kell a továbblépéshez
+- "Süllyedési vizsgálat": random popup teszt korábban tanult anyagból
+- Teljes alak→összevont: 3 kör (I cannot felismerés → I can't → vegyes)
+- 🔊 normál + 🐌 lassított minden hangnál
+
+**Hiányzó oldalak:**
+- Teljes szószedet (972 szó, ábécé/kategória/egység szűrők)
+- Nyelvtani összefoglaló (keresés magyar+angol)
+- Szintfelmérő oldal (5 részes)
+- Onboarding oldal (3 lépéses)
+- Könyv mód modal (PNG oldalak)
+
+**Tartalom pipeline (Greta feladata Excel-ekben):**
+1. Master Vocabulary Excel → 972 szó, deduplikálva, unit_id-vel
+2. Grammar Rules Excel → 20 egység szabályai
+3. Questions Excel → ~1500-2400 kérdés (10 típusonként ~150-240)
+4. Dialogues Excel → 7 szituáció × több párbeszéd
+5. Könyvoldal PNG-k → 20 egység, ~40-60 kép
+6. Hanganyag → TTS normál + lassított (Web Speech API vagy előre generált)
