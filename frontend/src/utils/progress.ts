@@ -104,7 +104,7 @@ export const getStreak = (): number => {
 };
 
 export const getErrorWords = (): Record<number, number> => {
-  return loadProgress().errorDict;
+  return loadProgress().errorDict || {};
 };
 
 /** Get list of unit IDs that have at least one completed lesson (V4). */

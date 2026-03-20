@@ -29,7 +29,7 @@ const ErrorDictionaryPage = () => {
   }, []);
 
   const loadErrorWords = async () => {
-    const errorDict = getErrorWords();
+    const errorDict = getErrorWords() || {};
     const entries = Object.entries(errorDict)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 30);
