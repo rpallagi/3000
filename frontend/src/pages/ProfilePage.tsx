@@ -94,6 +94,62 @@ const ProfilePage = () => {
             </div>
           </button>
 
+          {/* Vocabulary link */}
+          <button
+            onClick={() => navigate("/vocabulary")}
+            className="w-full bg-card rounded-2xl border border-border p-4 flex items-center gap-3 text-left hover:border-foreground/20 transition-all"
+            style={{ boxShadow: "var(--card-shadow)" }}
+          >
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#E91E6320" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E91E63" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">Szószedet</p>
+              <p className="text-xs text-muted-foreground">972 szó keresővel</p>
+            </div>
+          </button>
+
+          {/* Level test */}
+          <button
+            onClick={() => navigate("/level-test")}
+            className="w-full bg-card rounded-2xl border border-border p-4 flex items-center gap-3 text-left hover:border-foreground/20 transition-all"
+            style={{ boxShadow: "var(--card-shadow)" }}
+          >
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#1565C020" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1565C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">Szintfelmérő</p>
+              <p className="text-xs text-muted-foreground">Mérd fel a tudásodat</p>
+            </div>
+          </button>
+
+          {/* Onboarding reset */}
+          <button
+            onClick={() => {
+              localStorage.removeItem("playeng_onboarded");
+              localStorage.removeItem("playeng_level_test_done");
+              navigate("/onboarding");
+            }}
+            className="w-full bg-card rounded-2xl border border-border p-4 flex items-center gap-3 text-left hover:border-foreground/20 transition-all"
+            style={{ boxShadow: "var(--card-shadow)" }}
+          >
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#FF980020" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF9800" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">Onboarding újraindítása</p>
+              <p className="text-xs text-muted-foreground">Bemutató + szintfelmérő újra</p>
+            </div>
+          </button>
+
           {!user && (
             <button
               onClick={() => navigate("/login")}
