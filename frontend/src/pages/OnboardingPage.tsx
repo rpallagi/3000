@@ -75,8 +75,8 @@ const OnboardingPage = () => {
         className="mb-8 text-center"
       >
         <h1 className="text-3xl font-bold">
-          <span style={{ color: "#4CAF50" }}>Play</span>
-          <span className="text-foreground">ENG</span>
+          <span style={{ color: "#4CAF50" }}>play</span>
+          <span style={{ color: "#E91E63" }} className="font-bold">ENG</span>
         </h1>
         <p className="text-sm text-muted-foreground mt-1">Magyar fejjel, angol nyelven.</p>
       </motion.div>
