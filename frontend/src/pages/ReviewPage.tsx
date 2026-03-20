@@ -106,7 +106,7 @@ const ReviewPage = () => {
     id: item.wordId,
     word: item.word,
     wordDisplay: item.word,
-    hungarian: "", // Will be filled by the quiz task from distractors
+    hungarian: item.hungarian || "",
     pos: "",
     chapter: 0,
     sentences: [],
@@ -145,6 +145,16 @@ const ReviewPage = () => {
           />
         </div>
 
+        {/* Word hint — always show what word to review */}
+        <div className="w-full text-center mb-4">
+          <p className="text-xs text-muted-foreground tracking-widest uppercase mb-1">
+            {taskType === "typing" ? "Gépeld be angolul" : "Mi az angolul?"}
+          </p>
+          <p className="text-lg font-semibold" style={{ color: "#E91E63" }}>
+            {item.hungarian || item.word}
+          </p>
+        </div>
+
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
@@ -154,8 +164,8 @@ const ReviewPage = () => {
             transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
             className="w-full"
           >
-            {taskType === "typing" ? (
-              <TypingTask word={wordData} onComplete={handleComplete} />
+            {taskType === "quiz" && wordData.hungarian ? (
+              <VocabularyQuizTask word={wordData} onComplete={handleComplete} />
             ) : (
               <TypingTask word={wordData} onComplete={handleComplete} />
             )}

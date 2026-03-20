@@ -13,6 +13,7 @@ const SM2_STORAGE_KEY = "playeng_sm2";
 export interface SM2Item {
   wordId: number;
   word: string;
+  hungarian?: string;     // Hungarian translation for review display
   unitId: string;
   easeFactor: number;     // 2.5 default, min 1.3
   interval: number;       // days until next review
@@ -139,14 +140,22 @@ export const getAllItems = (): SM2Item[] => {
 /**
  * Add a word to the review system (triggered by errors, taps, slow answers).
  */
-export const addToReview = (wordId: number, word: string, unitId: string): void => {
+export const addToReview = (wordId: number, word: string, unitId: string, hungarian?: string): void => {
   const data = loadSM2();
-  if (data.items[wordId]) return; // Already tracked
+  if (data.items[wordId]) {
+    // Update hungarian if it was missing
+    if (hungarian && !data.items[wordId].hungarian) {
+      data.items[wordId].hungarian = hungarian;
+      saveSM2(data);
+    }
+    return;
+  }
 
   const today = new Date().toISOString().slice(0, 10);
   data.items[wordId] = {
     wordId,
     word,
+    hungarian,
     unitId,
     easeFactor: 2.5,
     interval: 1,

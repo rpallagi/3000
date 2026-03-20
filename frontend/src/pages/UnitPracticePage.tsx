@@ -173,10 +173,10 @@ const UnitPracticePage = () => {
         if (isError) {
           setErrors((prev) => [...prev, { wordId: w.id, word: w.word }]);
           // Add to SM-2 review system (wrong answer)
-          addToReview(w.id, w.word, lesson.unitId);
+          addToReview(w.id, w.word, lesson.unitId, w.hungarian);
         } else if (elapsed > 10000) {
           // Slow answer (>10s) — Greta spec: add to SM-2
-          addToReview(w.id, w.word, lesson.unitId);
+          addToReview(w.id, w.word, lesson.unitId, w.hungarian);
         }
       }
 
