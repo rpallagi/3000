@@ -15,7 +15,7 @@ const ProfilePage = () => {
 
   const totalTracked = sm2Items.length;
   const masteredCount = sm2Items.filter((i) => i.repetitions >= 4).length;
-  const errorCount = Object.keys(errorWords).length;
+  const errorCount = Object.keys(errorWords || {}).length;
 
   return (
     <div className="min-h-screen bg-background">
