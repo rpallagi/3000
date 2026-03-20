@@ -117,12 +117,10 @@ const GrammarSummaryPage = () => {
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ background: `${borderColor}20` }}
+                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-bold"
+                        style={{ background: borderColor }}
                       >
-                        <span className="text-xs font-bold text-white px-1.5 py-0.5 rounded-md" style={{ background: borderColor, fontSize: 11 }}>
-                          {unit.id}
-                        </span>
+                        {unit.id}
                       </div>
                       <span className="text-sm font-medium text-foreground">{unit.title}</span>
                     </div>

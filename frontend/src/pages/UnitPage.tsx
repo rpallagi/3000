@@ -78,13 +78,13 @@ const UnitPage = () => {
           >
             <ArrowLeft className="w-4 h-4" />
           </motion.button>
-          <div className="flex items-center gap-2">
-            <span
-              className="text-sm font-bold px-2.5 py-1 rounded-lg text-white"
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-bold"
               style={{ background: borderColor }}
             >
               {unit.id}
-            </span>
+            </div>
             <h1 className="text-xl font-semibold text-foreground">{unit.title}</h1>
           </div>
         </div>
