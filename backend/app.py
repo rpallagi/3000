@@ -38,7 +38,8 @@ def create_app():
 
     # Create tables on first request
     with app.app_context():
-        from models.user import User, UserProgress, WordError, UserStreak, WebAuthnCredential
+        from models.user import (User, UserProgress, WordError, UserStreak,
+                                  WebAuthnCredential, SM2Review, UnitProgressV4, LevelTestResult)
         db.create_all()
 
     # --- Existing data API (unchanged for backward compat) ---

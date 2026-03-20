@@ -136,6 +136,102 @@ class UserStreak(db.Model):
         }
 
 
+class SM2Review(db.Model):
+    """SM-2 spaced repetition data — synced from client."""
+    __tablename__ = 'sm2_reviews'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    word_id = db.Column(db.Integer, nullable=False)
+    word = db.Column(db.String(100), nullable=False)
+    unit_id = db.Column(db.String(10), nullable=False)
+    ease_factor = db.Column(db.Float, nullable=False, default=2.5)
+    interval = db.Column(db.Integer, nullable=False, default=1)
+    repetitions = db.Column(db.Integer, nullable=False, default=0)
+    next_review = db.Column(db.Date, nullable=False)
+    last_review = db.Column(db.Date, nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'word_id', name='uq_user_word_sm2'),
+    )
+
+    def to_dict(self):
+        return {
+            'wordId': self.word_id,
+            'word': self.word,
+            'unitId': self.unit_id,
+            'easeFactor': self.ease_factor,
+            'interval': self.interval,
+            'repetitions': self.repetitions,
+            'nextReview': self.next_review.isoformat() if self.next_review else None,
+            'lastReview': self.last_review.isoformat() if self.last_review else None,
+        }
+
+
+class UnitProgressV4(db.Model):
+    """V4 unit-based progress tracking."""
+    __tablename__ = 'unit_progress_v4'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    unit_id = db.Column(db.String(10), nullable=False)
+    completed_lessons = db.Column(db.Integer, nullable=False, default=0)
+    total_score = db.Column(db.Integer, nullable=False, default=0)
+    total_max_score = db.Column(db.Integer, nullable=False, default=0)
+    word_count = db.Column(db.Integer, nullable=False, default=0)
+    test_passed = db.Column(db.Boolean, nullable=False, default=False)
+    test_score = db.Column(db.Integer)
+    completed_at = db.Column(db.DateTime(timezone=True))
+    updated_at = db.Column(
+        db.DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
+    )
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'unit_id', name='uq_user_unit_progress'),
+    )
+
+    def to_dict(self):
+        pct = round((self.total_score / self.total_max_score) * 100) if self.total_max_score > 0 else 0
+        return {
+            'unitId': self.unit_id,
+            'completedLessons': self.completed_lessons,
+            'totalScore': self.total_score,
+            'totalMaxScore': self.total_max_score,
+            'wordCount': self.word_count,
+            'testPassed': self.test_passed,
+            'testScore': self.test_score,
+            'percentCorrect': pct,
+            'completedAt': self.completed_at.isoformat() if self.completed_at else None,
+        }
+
+
+class LevelTestResult(db.Model):
+    """Stores placement test results."""
+    __tablename__ = 'level_test_results'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    start_unit = db.Column(db.String(10), nullable=False)
+    parts_passed = db.Column(db.Integer, nullable=False, default=0)
+    total_score = db.Column(db.Integer, nullable=False, default=0)
+    total_questions = db.Column(db.Integer, nullable=False, default=0)
+    taken_at = db.Column(
+        db.DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc)
+    )
+
+    def to_dict(self):
+        return {
+            'startUnit': self.start_unit,
+            'partsPassed': self.parts_passed,
+            'totalScore': self.total_score,
+            'totalQuestions': self.total_questions,
+            'takenAt': self.taken_at.isoformat() if self.taken_at else None,
+        }
+
+
 class WebAuthnCredential(db.Model):
     __tablename__ = 'webauthn_credentials'
 

@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
-import { fetchUnits, fetchUnitLesson, WordData } from "@/utils/api";
+import { fetchUnits, fetchUnitLesson, WordData, saveLevelTestResult } from "@/utils/api";
+import { authHeaders, getAccessToken } from "@/contexts/AuthContext";
 import VocabularyQuizTask from "@/components/tasks/VocabularyQuizTask";
 import TypingTask from "@/components/tasks/TypingTask";
 import TwoOptionTask from "@/components/tasks/TwoOptionTask";
@@ -119,6 +120,16 @@ const LevelTestPage = () => {
     setPhase("completed");
     localStorage.setItem("playeng_start_unit", unit);
     localStorage.setItem("playeng_level_test_done", "true");
+
+    // Save to server if logged in
+    if (getAccessToken()) {
+      saveLevelTestResult({
+        startUnit: unit,
+        partsPassed: failedAtPart,
+        totalScore: correctInPart,
+        totalQuestions: QUESTIONS_PER_PART * Math.min(failedAtPart + 1, PARTS.length),
+      }, authHeaders()).catch(() => {});
+    }
   };
 
   const handleAnswer = useCallback(

@@ -209,6 +209,11 @@ export const syncProgressFromServer = async (): Promise<void> => {
     }
 
     saveProgress(localData);
+
+    // Also sync SM-2 data
+    const { syncSM2FromServer, syncSM2ToServer } = await import("@/utils/sm2");
+    await syncSM2FromServer();
+    await syncSM2ToServer();
   } catch {
     // Offline — keep local data
   }

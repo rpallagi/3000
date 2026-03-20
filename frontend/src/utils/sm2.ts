@@ -156,3 +156,54 @@ export const addToReview = (wordId: number, word: string, unitId: string): void 
   };
   saveSM2(data);
 };
+
+/**
+ * Sync SM-2 data to server (if logged in).
+ */
+export const syncSM2ToServer = async (): Promise<void> => {
+  const { getAccessToken, authHeaders } = await import("@/contexts/AuthContext");
+  if (!getAccessToken()) return;
+
+  const data = loadSM2();
+  const items = Object.values(data.items);
+  if (items.length === 0) return;
+
+  try {
+    await fetch("/api/progress/sm2/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify(items),
+    });
+  } catch {
+    // Offline — will sync later
+  }
+};
+
+/**
+ * Fetch SM-2 data from server and merge with local.
+ */
+export const syncSM2FromServer = async (): Promise<void> => {
+  const { getAccessToken, authHeaders } = await import("@/contexts/AuthContext");
+  if (!getAccessToken()) return;
+
+  try {
+    const res = await fetch("/api/progress/sm2", {
+      headers: authHeaders(),
+    });
+    if (!res.ok) return;
+
+    const serverItems: SM2Item[] = await res.json();
+    const data = loadSM2();
+
+    for (const serverItem of serverItems) {
+      const local = data.items[serverItem.wordId];
+      if (!local || serverItem.lastReview > local.lastReview) {
+        data.items[serverItem.wordId] = serverItem;
+      }
+    }
+
+    saveSM2(data);
+  } catch {
+    // Offline
+  }
+};

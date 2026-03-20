@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
@@ -83,6 +83,7 @@ const UnitPracticePage = () => {
   const [scores, setScores] = useState<number[]>([]);
   const [errors, setErrors] = useState<{ wordId: number; word: string }[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const taskStartTime = useRef<number>(Date.now());
 
   useEffect(() => {
     if (!unitId || !lessonId) return;
@@ -160,15 +161,23 @@ const UnitPracticePage = () => {
 
   const handleTaskComplete = useCallback(
     (score: number, isError: boolean) => {
+      const elapsed = Date.now() - taskStartTime.current;
       setScores((prev) => [...prev, score]);
-      if (isError && tasks[currentTaskIndex]?.word) {
-        const w = tasks[currentTaskIndex].word!;
-        setErrors((prev) => [...prev, { wordId: w.id, word: w.word }]);
-        // Add to SM-2 review system
-        if (lesson) {
+
+      const w = tasks[currentTaskIndex]?.word;
+      if (w && lesson) {
+        if (isError) {
+          setErrors((prev) => [...prev, { wordId: w.id, word: w.word }]);
+          // Add to SM-2 review system (wrong answer)
+          addToReview(w.id, w.word, lesson.unitId);
+        } else if (elapsed > 10000) {
+          // Slow answer (>10s) — Greta spec: add to SM-2
           addToReview(w.id, w.word, lesson.unitId);
         }
       }
+
+      // Reset timer for next task
+      taskStartTime.current = Date.now();
 
       if (currentTaskIndex < tasks.length - 1) {
         setCurrentTaskIndex((i) => i + 1);
@@ -176,7 +185,7 @@ const UnitPracticePage = () => {
         setShowResults(true);
       }
     },
-    [currentTaskIndex, tasks]
+    [currentTaskIndex, tasks, lesson]
   );
 
   useEffect(() => {
@@ -193,6 +202,23 @@ const UnitPracticePage = () => {
         unitId: lesson.unitId,
         totalTasks: tasks.length,
         wordCount: lesson.words.length,
+      });
+
+      // Sync SM-2 to server
+      import("@/utils/sm2").then(({ syncSM2ToServer }) => syncSM2ToServer().catch(() => {}));
+
+      // Sync unit progress to server
+      import("@/utils/api").then(({ saveUnitProgress }) => {
+        import("@/contexts/AuthContext").then(({ getAccessToken, authHeaders }) => {
+          if (getAccessToken()) {
+            saveUnitProgress(lesson.unitId, {
+              completedLessons: Number(lessonId),
+              totalScore,
+              totalMaxScore: maxPossible,
+              wordCount: lesson.words.length,
+            }, authHeaders()).catch(() => {});
+          }
+        });
       });
     }
   }, [showResults]);

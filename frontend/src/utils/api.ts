@@ -170,3 +170,41 @@ export const fetchVocabulary = async (params?: { unit?: string; q?: string; sort
   if (!res.ok) throw new Error("Failed to fetch vocabulary");
   return res.json();
 };
+
+// --- Progress sync API (requires auth) ---
+
+export const saveUnitProgress = async (
+  unitId: string,
+  data: { completedLessons?: number; totalScore?: number; totalMaxScore?: number; wordCount?: number; completed?: boolean },
+  headers: Record<string, string>
+): Promise<void> => {
+  await fetch(`${API_BASE}/progress/units/${unitId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify(data),
+  });
+};
+
+export const saveUnitTestResult = async (
+  unitId: string,
+  data: { score: number; maxScore: number },
+  headers: Record<string, string>
+): Promise<{ passed: boolean; percent: number }> => {
+  const res = await fetch(`${API_BASE}/progress/units/${unitId}/test`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+};
+
+export const saveLevelTestResult = async (
+  data: { startUnit: string; partsPassed: number; totalScore: number; totalQuestions: number },
+  headers: Record<string, string>
+): Promise<void> => {
+  await fetch(`${API_BASE}/progress/level-test`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: JSON.stringify(data),
+  });
+};
