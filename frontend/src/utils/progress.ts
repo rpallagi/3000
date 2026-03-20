@@ -9,6 +9,9 @@ export interface LessonResult {
   maxScore: number;
   completedAt: string;
   errors: { wordId: number; word: string }[];
+  unitId?: string;        // V4: unit ID (e.g. "1A", "2B")
+  totalTasks?: number;    // V4: how many tasks were in the lesson
+  wordCount?: number;     // V4: how many words were learned
 }
 
 interface ProgressData {
@@ -32,7 +35,10 @@ const saveProgress = (data: ProgressData): void => {
 /** Sync lesson result to server if logged in, always save locally. */
 export const saveLessonResult = async (result: LessonResult): Promise<void> => {
   const data = loadProgress();
-  const key = `${result.chapterId}-${result.lessonId}`;
+  // V4: use unitId-based key if available, otherwise fall back to chapterId
+  const key = result.unitId
+    ? `${result.unitId}-${result.lessonId}`
+    : `${result.chapterId}-${result.lessonId}`;
 
   // Keep best score locally
   const existing = data.lessons[key];
@@ -101,18 +107,70 @@ export const getErrorWords = (): Record<number, number> => {
   return loadProgress().errorDict;
 };
 
-/** Get list of completed unit IDs (V4). */
+/** Get list of unit IDs that have at least one completed lesson (V4). */
 export const getCompletedUnits = (): string[] => {
   const data = loadProgress();
   const completedUnits = new Set<string>();
-  // Check lessons stored with unitId format (e.g. "1A-1", "2B-3")
-  for (const key of Object.keys(data.lessons)) {
+  for (const [key, lesson] of Object.entries(data.lessons)) {
+    // Check unitId field first (V4 format)
+    if (lesson.unitId) {
+      completedUnits.add(lesson.unitId);
+      continue;
+    }
+    // Fall back to key-based detection (e.g. "1A-1", "2B-3")
     const parts = key.split("-");
     if (parts.length >= 2 && /^[1-5][A-E]$/.test(parts[0])) {
       completedUnits.add(parts[0]);
     }
   }
   return Array.from(completedUnits);
+};
+
+/** Get progress for a specific unit (V4). */
+export const getUnitProgress = (unitId: string): {
+  completedLessons: number;
+  totalScore: number;
+  totalMaxScore: number;
+  wordCount: number;
+} => {
+  const data = loadProgress();
+  let completedLessons = 0;
+  let totalScore = 0;
+  let totalMaxScore = 0;
+  let wordCount = 0;
+
+  for (const [key, lesson] of Object.entries(data.lessons)) {
+    const isUnitLesson = lesson.unitId === unitId ||
+      (key.startsWith(`${unitId}-`) && /^[1-5][A-E]$/.test(unitId));
+    if (isUnitLesson) {
+      completedLessons++;
+      totalScore += lesson.score;
+      totalMaxScore += lesson.maxScore;
+      wordCount += lesson.wordCount || 0;
+    }
+  }
+
+  return { completedLessons, totalScore, totalMaxScore, wordCount };
+};
+
+/** Get total learned word count across all units (V4). */
+export const getTotalLearnedWords = (): number => {
+  const data = loadProgress();
+  let total = 0;
+  for (const lesson of Object.values(data.lessons)) {
+    total += lesson.wordCount || 0;
+  }
+  return total;
+};
+
+/** Get total completed tasks count (V4 motiváció: "X feladat kész"). */
+export const getTotalCompletedTasks = (): number => {
+  const data = loadProgress();
+  let total = 0;
+  for (const lesson of Object.values(data.lessons)) {
+    total += lesson.totalTasks || 0;
+  }
+  return total;
 };
 
 /** Fetch server-side progress and merge with local data. */

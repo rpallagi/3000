@@ -73,6 +73,9 @@ const SentenceBuildingTask = ({ word, onComplete }: Props) => {
       </p>
       <p className="text-xs text-muted-foreground -mt-4">
         Rakd össze az angol mondatot a magyar jelentés alapján.
+        {(word.distractors?.length || 0) > 0 && (
+          <span className="ml-1" style={{ color: "#FF9800" }}>Vigyázz, van csapda!</span>
+        )}
       </p>
 
       <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground text-center leading-snug px-2">

@@ -36,14 +36,19 @@ def save_lesson():
     if not data:
         return jsonify({'error': 'Missing data'}), 400
 
-    chapter_id = data.get('chapterId')
+    chapter_id = data.get('chapterId', 0)
     lesson_id = data.get('lessonId')
     score = data.get('score', 0)
     max_score = data.get('maxScore', 0)
     errors = data.get('errors', [])
+    unit_id = data.get('unitId')  # V4: unit-based progress
 
-    if not chapter_id or not lesson_id:
-        return jsonify({'error': 'Missing chapterId or lessonId'}), 400
+    # V4: if unitId provided, use hash-based chapter_id for storage
+    if unit_id and not chapter_id:
+        chapter_id = abs(hash(unit_id)) % 10000
+
+    if not lesson_id:
+        return jsonify({'error': 'Missing lessonId'}), 400
 
     # Upsert lesson progress (keep best score)
     existing = UserProgress.query.filter_by(

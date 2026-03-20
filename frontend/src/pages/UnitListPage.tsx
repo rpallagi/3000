@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import { fetchUnits, UnitData } from "@/utils/api";
-import { getCompletedUnits, getStreak } from "@/utils/progress";
+import { getCompletedUnits, getStreak, getTotalLearnedWords, getTotalCompletedTasks } from "@/utils/progress";
 import { getDueCount } from "@/utils/sm2";
 
 const COLOR_MAP: Record<string, string> = {
@@ -59,10 +59,11 @@ const UnitListPage = () => {
   }
 
   const totalWords = units.reduce((sum, u) => sum + u.wordCount, 0);
-  const learnedWords = completedUnits.reduce((sum, uid) => {
+  const learnedWords = getTotalLearnedWords() || completedUnits.reduce((sum, uid) => {
     const u = units.find((x) => x.id === uid);
     return sum + (u?.wordCount || 0);
   }, 0);
+  const completedTasks = getTotalCompletedTasks();
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,9 +78,14 @@ const UnitListPage = () => {
           <p className="text-sm text-muted-foreground tracking-widest uppercase font-medium mb-2">
             Magyar fejjel, angol nyelven.
           </p>
-          <h1 className="text-2xl font-semibold text-foreground mb-4">
-            {learnedWords} / {totalWords} szó
+          <h1 className="text-2xl font-semibold text-foreground mb-2">
+            {learnedWords} szót tanultál
           </h1>
+          {completedTasks > 0 && (
+            <p className="text-sm text-muted-foreground mb-2">
+              {completedTasks} feladat kész
+            </p>
+          )}
           <div className="w-full h-2 bg-secondary rounded-full">
             <motion.div
               className="h-full rounded-full"

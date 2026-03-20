@@ -61,8 +61,17 @@ const FillGapTask = ({ word, onComplete }: Props) => {
         style={{ boxShadow: "var(--card-shadow)", borderLeftWidth: 4, borderLeftColor: "#4CAF50" }}>
         <p className="text-base text-foreground leading-relaxed">{displaySentence}</p>
         {sentence && (
-          <p className="text-sm mt-2" style={{ color: "#FF9800" }}>
-            {sentence.hu}
+          <p className="text-sm mt-2">
+            <span className="text-muted-foreground">
+              {sentence.hu.split(word.hungarian).map((part, i, arr) => (
+                <span key={i}>
+                  {part}
+                  {i < arr.length - 1 && (
+                    <span className="font-bold" style={{ color: "#FF9800" }}>{word.hungarian}</span>
+                  )}
+                </span>
+              ))}
+            </span>
           </p>
         )}
       </div>

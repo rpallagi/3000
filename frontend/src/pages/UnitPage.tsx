@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
 import { fetchUnit, UnitDetail, TaskTypeData } from "@/utils/api";
+import { getUnitProgress } from "@/utils/progress";
 
 const COLOR_MAP: Record<string, string> = {
   pink: "#E91E63",
@@ -58,6 +59,10 @@ const UnitPage = () => {
 
   const borderColor = COLOR_MAP[unit.color] || "#4CAF50";
   const totalLessons = Math.max(1, Math.ceil(unit.wordCount / 8));
+  const unitProgress = getUnitProgress(unit.id);
+  const progressPct = unitProgress.totalMaxScore > 0
+    ? Math.round((unitProgress.totalScore / unitProgress.totalMaxScore) * 100)
+    : 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -111,9 +116,40 @@ const UnitPage = () => {
           </motion.div>
         )}
 
+        {/* Unit progress */}
+        {unitProgress.completedLessons > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-card rounded-2xl border border-border p-4 mb-6 flex items-center gap-4"
+            style={{ boxShadow: "var(--card-shadow)" }}
+          >
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">
+                {unitProgress.wordCount} szót tanultál
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {unitProgress.completedLessons} lecke · {progressPct}% helyes
+              </p>
+            </div>
+            <div className="w-12 h-12 relative">
+              <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none" stroke="hsl(var(--secondary))" strokeWidth="3" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none" stroke={borderColor} strokeWidth="3"
+                  strokeDasharray={`${progressPct}, 100`} />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-foreground">
+                {progressPct}%
+              </span>
+            </div>
+          </motion.div>
+        )}
+
         {/* Task list — 10 tasks */}
         <h3 className="text-sm font-medium text-muted-foreground tracking-widest uppercase mb-3 px-1">
-          Feladatok · 0/10
+          Feladatok · {unitProgress.completedLessons > 0 ? `${Math.min(10, unitProgress.completedLessons)}/10` : "0/10"}
         </h3>
         <div className="flex flex-col gap-2 mb-6">
           {(unit.taskTypes || []).map((task: TaskTypeData, i: number) => {
@@ -152,6 +188,19 @@ const UnitPage = () => {
           style={{ background: `linear-gradient(135deg, ${borderColor}, ${borderColor}dd)` }}
         >
           Összes feladat indítása
+        </motion.button>
+
+        {/* Unit test button */}
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate(`/unit/${unit.id}/test`)}
+          className="w-full py-4 rounded-2xl font-medium text-center mt-3 border-2 transition-colors"
+          style={{ borderColor: "#E91E63", color: "#E91E63" }}
+        >
+          Egység teszt (80% kell)
         </motion.button>
 
         {/* Word list preview */}

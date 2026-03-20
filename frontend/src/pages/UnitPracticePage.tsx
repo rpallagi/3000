@@ -155,12 +155,15 @@ const UnitPracticePage = () => {
       const totalScore = scores.reduce((a, b) => a + b, 0);
       const maxPossible = tasks.length * 8;
       saveLessonResult({
-        chapterId: 0, // V4 uses unitId instead
+        chapterId: 0,
         lessonId: Number(lessonId),
         score: totalScore,
         maxScore: maxPossible,
         completedAt: new Date().toISOString(),
         errors,
+        unitId: lesson.unitId,
+        totalTasks: tasks.length,
+        wordCount: lesson.words.length,
       });
     }
   }, [showResults]);
