@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Trophy, RotateCcw, ArrowLeft, BookOpen, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import { getStreak, getTotalLearnedWords } from "@/utils/progress";
+import { getBenchmarkPercentile } from "@/utils/levels";
 
 interface Props {
   score: number;
@@ -176,6 +178,28 @@ const ResultsScreen = ({ score, maxScore, errors, chapterName, onBack, onRetry }
             </button>
           </motion.div>
         )}
+
+        {/* Streak + Benchmark (Greta style) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="w-full flex gap-3"
+        >
+          {getStreak() > 0 && (
+            <div className="flex-1 bg-card rounded-2xl border border-border p-4 text-center" style={{ boxShadow: "var(--card-shadow)" }}>
+              <p className="text-lg font-bold" style={{ color: "#FF9800" }}>
+                {getStreak()} nap
+              </p>
+              <p className="text-[10px] text-muted-foreground">sorozat</p>
+            </div>
+          )}
+          <div className="flex-1 bg-card rounded-2xl border border-border p-4 text-center" style={{ boxShadow: "var(--card-shadow)" }}>
+            <p className="text-sm font-medium" style={{ color: "#4CAF50" }}>
+              Gyorsabban haladsz, mint a tanulók {getBenchmarkPercentile(getTotalLearnedWords(), getStreak())}%-a!
+            </p>
+          </div>
+        </motion.div>
 
         <div className="flex gap-3 mt-4 w-full sm:w-auto">
           <motion.button

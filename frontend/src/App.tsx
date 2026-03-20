@@ -27,6 +27,7 @@ import UnitLessonPage from "./pages/UnitLessonPage.tsx";
 import UnitPracticePage from "./pages/UnitPracticePage.tsx";
 import UnitTestPage from "./pages/UnitTestPage.tsx";
 import LevelTestPage from "./pages/LevelTestPage.tsx";
+import GrammarSummaryPage from "./pages/GrammarSummaryPage.tsx";
 import OnboardingPage from "./pages/OnboardingPage.tsx";
 import ReviewPage from "./pages/ReviewPage.tsx";
 import VocabularyPage from "./pages/VocabularyPage.tsx";
@@ -66,6 +67,7 @@ const App = () => (
               {/* V4 shared pages */}
               <Route path="/review" element={<ReviewPage />} />
               <Route path="/vocabulary" element={<VocabularyPage />} />
+              <Route path="/grammar" element={<GrammarSummaryPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/error-dictionary" element={<ErrorDictionaryPage />} />
               <Route path="/daily" element={<DailyChallengePage />} />

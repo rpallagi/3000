@@ -6,6 +6,7 @@ import { fetchUnits, UnitData } from "@/utils/api";
 import { getCompletedUnits, getStreak, getTotalLearnedWords, getTotalCompletedTasks } from "@/utils/progress";
 import { getDueCount } from "@/utils/sm2";
 import { getUserLevel, getBenchmarkPercentile, getStarDisplay } from "@/utils/levels";
+import { hasOnboarded } from "@/pages/OnboardingPage";
 
 const COLOR_MAP: Record<string, string> = {
   pink: "#E91E63",
@@ -31,11 +32,17 @@ const UnitListPage = () => {
   const dueCount = getDueCount();
 
   useEffect(() => {
+    // Redirect to onboarding if first visit
+    if (!hasOnboarded()) {
+      navigate("/onboarding", { replace: true });
+      return;
+    }
+
     fetchUnits()
       .then(setUnits)
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [navigate]);
 
   if (loading) {
     return (
@@ -136,6 +143,35 @@ const UnitListPage = () => {
             </motion.button>
           )}
         </div>
+
+        {/* Smart Resume — Folytatás gomb */}
+        {completedUnits.length > 0 && completedUnits.length < units.length && (() => {
+          // Find next uncompleted unit
+          const nextUnit = units.find((u) => !completedUnits.includes(u.id));
+          if (!nextUnit) return null;
+          return (
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate(`/unit/${nextUnit.id}`)}
+              className="w-full bg-gradient-to-r from-green-500/10 to-pink-500/10 border border-green-500/20 rounded-2xl p-4 flex items-center gap-3 text-left mb-6 hover:border-green-500/40 transition-colors"
+              style={{ boxShadow: "var(--card-shadow)" }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#4CAF5020" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  Folytatás: {nextUnit.id} — {nextUnit.title}
+                </p>
+                <p className="text-xs text-muted-foreground">{nextUnit.wordCount} szó</p>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 flex-shrink-0 ml-auto"><path d="m9 18 6-6-6-6"/></svg>
+            </motion.button>
+          );
+        })()}
 
         {/* Units by part */}
         {Array.from(parts.entries()).map(([part, partUnits]) => (
