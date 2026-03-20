@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { WordData } from "@/utils/api";
 
@@ -20,12 +20,15 @@ const TwoOptionTask = ({ word, onComplete }: Props) => {
     return <FallbackTwoOption correct={correct} wrong={wrong} hungarian={word.hungarian} onComplete={onComplete} />;
   }
 
-  // Build correct and wrong options from sentence
-  const correct = sentence.en;
-  // Create a plausible wrong version
-  const wrongVersion = sentence.en.replace(word.word, word.distractors?.[0] || "___");
-
-  const options = [correct, wrongVersion].sort(() => Math.random() - 0.5);
+  // Build correct and wrong options from sentence — memoized
+  const { correct, options } = useMemo(() => {
+    const c = sentence.en;
+    const wrongVersion = sentence.en.replace(word.word, word.distractors?.[0] || "___");
+    return {
+      correct: c,
+      options: [c, wrongVersion].sort(() => Math.random() - 0.5),
+    };
+  }, [word, sentence]);
 
   const handleSelect = (option: string) => {
     if (selected) return;

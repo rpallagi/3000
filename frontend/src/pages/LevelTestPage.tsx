@@ -1,18 +1,11 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
-import { fetchUnits, fetchUnitLesson, UnitData, WordData } from "@/utils/api";
+import { fetchUnits, fetchUnitLesson, WordData } from "@/utils/api";
 import VocabularyQuizTask from "@/components/tasks/VocabularyQuizTask";
 import TypingTask from "@/components/tasks/TypingTask";
 import TwoOptionTask from "@/components/tasks/TwoOptionTask";
-
-/**
- * Szintfelmérő — Greta spec:
- * - 5 rész × 1 perc × 5 kérdés
- * - A LEGNEHEZEBB kérdéseket teszi fel
- * - Fail Part 1 → start 1A, pass Part 1 fail Part 2 → start 2A, stb.
- */
 
 const PARTS = [
   { id: 1, label: "1. rész — Alapok", units: ["1A", "1B", "1C", "1D"] },
@@ -23,149 +16,136 @@ const PARTS = [
 ];
 
 const QUESTIONS_PER_PART = 5;
-const TIME_PER_PART_MS = 60_000; // 1 perc
+const TIME_PER_PART_SEC = 60;
 
 interface Question {
   word: WordData;
   taskType: "quiz" | "typing" | "twoOption";
 }
 
+type Phase = "loading" | "testing" | "completed";
+
 const LevelTestPage = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const [phase, setPhase] = useState<Phase>("loading");
   const [allWords, setAllWords] = useState<Map<string, WordData[]>>(new Map());
+
+  // Test state
   const [currentPart, setCurrentPart] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQ, setCurrentQ] = useState(0);
-  const [partScores, setPartScores] = useState<number[]>([]);
-  const [currentPartScore, setCurrentPartScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(TIME_PER_PART_MS);
-  const [timerActive, setTimerActive] = useState(false);
-  const [completed, setCompleted] = useState(false);
-  const [resultLevel, setResultLevel] = useState("");
+  const [correctInPart, setCorrectInPart] = useState(0);
+  const [passedParts, setPassedParts] = useState(0);
+  const [resultUnit, setResultUnit] = useState("1A");
 
-  // Load words for all units
+  // Timer
+  const [timeLeft, setTimeLeft] = useState(TIME_PER_PART_SEC);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Load words
   useEffect(() => {
-    const loadAll = async () => {
+    const load = async () => {
       try {
         const units = await fetchUnits();
-        const wordMap = new Map<string, WordData[]>();
+        const map = new Map<string, WordData[]>();
         for (const unit of units) {
           if (unit.wordCount > 0) {
             try {
               const lesson = await fetchUnitLesson(unit.id, 1);
-              wordMap.set(unit.id, lesson.words);
+              map.set(unit.id, lesson.words);
             } catch {}
           }
         }
-        setAllWords(wordMap);
+        setAllWords(map);
+        // Start first part
+        startPart(0, map);
       } catch {}
-      setLoading(false);
     };
-    loadAll();
+    load();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
 
-  // Start part
-  useEffect(() => {
-    if (loading || completed) return;
-    if (currentPart >= PARTS.length) {
-      finishTest();
+  const startPart = (partIndex: number, wordMap: Map<string, WordData[]>) => {
+    if (partIndex >= PARTS.length) {
+      finish(partIndex);
       return;
     }
 
-    const part = PARTS[currentPart];
+    const part = PARTS[partIndex];
     const partWords: WordData[] = [];
     for (const uid of part.units) {
-      const words = allWords.get(uid) || [];
-      partWords.push(...words);
+      partWords.push(...(wordMap.get(uid) || []));
     }
 
     if (partWords.length === 0) {
-      // Skip empty part, mark as failed
-      setPartScores((prev) => [...prev, 0]);
-      setCurrentPart((p) => p + 1);
+      finish(partIndex);
       return;
     }
 
-    // Pick hardest words (longer words, more complex) — shuffle and take 5
+    // Pick hardest words (longer = more complex)
     const sorted = [...partWords].sort((a, b) => b.word.length - a.word.length);
     const selected = sorted.slice(0, QUESTIONS_PER_PART);
-    const taskTypes: ("quiz" | "typing" | "twoOption")[] = ["quiz", "typing", "twoOption", "quiz", "typing"];
+    const types: ("quiz" | "typing" | "twoOption")[] = ["quiz", "twoOption", "quiz", "typing", "twoOption"];
     const qs = selected.map((word, i) => ({
       word,
-      taskType: taskTypes[i % taskTypes.length],
+      taskType: types[i % types.length],
     }));
 
     setQuestions(qs);
     setCurrentQ(0);
-    setCurrentPartScore(0);
-    setTimeLeft(TIME_PER_PART_MS);
-    setTimerActive(true);
-  }, [currentPart, loading, allWords, completed]);
+    setCorrectInPart(0);
+    setCurrentPart(partIndex);
+    setTimeLeft(TIME_PER_PART_SEC);
+    setPhase("testing");
 
-  // Timer
-  useEffect(() => {
-    if (!timerActive) return;
-    const interval = setInterval(() => {
-      setTimeLeft((t) => {
-        if (t <= 100) {
-          // Time's up — end part
-          clearInterval(interval);
-          setTimerActive(false);
-          endPart();
-          return 0;
-        }
-        return t - 100;
-      });
-    }, 100);
-    return () => clearInterval(interval);
-  }, [timerActive]);
-
-  const endPart = useCallback(() => {
-    setTimerActive(false);
-    const passed = currentPartScore >= Math.ceil(QUESTIONS_PER_PART * 0.6); // 60% to pass part
-    setPartScores((prev) => [...prev, passed ? 1 : 0]);
-    if (passed) {
-      setCurrentPart((p) => p + 1);
-    } else {
-      finishTest();
-    }
-  }, [currentPartScore]);
-
-  const finishTest = () => {
-    setCompleted(true);
-    setTimerActive(false);
-    // Determine starting unit
-    const scores = [...partScores];
-    let startUnit = "1A";
-    for (let i = 0; i < scores.length; i++) {
-      if (scores[i] === 0) {
-        startUnit = PARTS[i].units[0];
-        break;
+    // Start timer
+    if (timerRef.current) clearInterval(timerRef.current);
+    let remaining = TIME_PER_PART_SEC;
+    timerRef.current = setInterval(() => {
+      remaining--;
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        // Time up — end part as failed
+        finish(partIndex);
       }
-      if (i === scores.length - 1 && scores[i] === 1) {
-        startUnit = "ismétlés"; // All passed
-      }
-    }
-    setResultLevel(startUnit);
-    localStorage.setItem("playeng_start_unit", startUnit);
+    }, 1000);
+  };
+
+  const finish = (failedAtPart: number) => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    const unit = failedAtPart < PARTS.length ? PARTS[failedAtPart].units[0] : "ismétlés";
+    setResultUnit(unit);
+    setPhase("completed");
+    localStorage.setItem("playeng_start_unit", unit);
     localStorage.setItem("playeng_level_test_done", "true");
   };
 
   const handleAnswer = useCallback(
     (score: number, _isError: boolean) => {
-      if (score > 0) setCurrentPartScore((s) => s + 1);
+      const isCorrect = score > 0;
+      const newCorrect = correctInPart + (isCorrect ? 1 : 0);
+      setCorrectInPart(newCorrect);
 
       if (currentQ < questions.length - 1) {
         setCurrentQ((q) => q + 1);
       } else {
-        endPart();
+        // Part finished
+        if (timerRef.current) clearInterval(timerRef.current);
+        const passed = newCorrect >= Math.ceil(QUESTIONS_PER_PART * 0.6);
+        if (passed) {
+          setPassedParts((p) => p + 1);
+          startPart(currentPart + 1, allWords);
+        } else {
+          finish(currentPart);
+        }
       }
     },
-    [currentQ, questions, endPart]
+    [currentQ, questions, correctInPart, currentPart, allWords]
   );
 
-  if (loading) {
+  // Loading
+  if (phase === "loading") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.5 }} className="text-muted-foreground">
@@ -175,14 +155,14 @@ const LevelTestPage = () => {
     );
   }
 
-  if (completed) {
-    const passedParts = partScores.filter((s) => s > 0).length;
+  // Completed
+  if (phase === "completed") {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="pt-20 sm:pt-24 pb-24 px-4 sm:px-6 max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[60vh]">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center w-full">
-            <div className="text-5xl mb-6">
+            <div className="mb-6">
               <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto">
                 <path d="m5 12 5 5L20 7"/>
               </svg>
@@ -192,7 +172,7 @@ const LevelTestPage = () => {
               {passedParts} / {PARTS.length} részt teljesítettél
             </p>
 
-            {resultLevel === "ismétlés" ? (
+            {resultUnit === "ismétlés" ? (
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-5 mb-6">
                 <p className="text-sm font-medium text-green-700 dark:text-green-300">
                   Gratulálunk! Mindent tudsz — az ismétlési módban folytathatod!
@@ -201,14 +181,13 @@ const LevelTestPage = () => {
             ) : (
               <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 mb-6">
                 <p className="text-sm text-foreground mb-1">Javasolt kezdőpont:</p>
-                <p className="text-2xl font-bold" style={{ color: "#4CAF50" }}>{resultLevel}</p>
+                <p className="text-2xl font-bold" style={{ color: "#4CAF50" }}>{resultUnit}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Innen érdemes indulnod a leghatékonyabb tanulás érdekében.
                 </p>
               </div>
             )}
 
-            {/* Time estimation */}
             <div className="bg-card rounded-2xl border border-border p-4 mb-6" style={{ boxShadow: "var(--card-shadow)" }}>
               <p className="text-sm text-muted-foreground mb-1">Becsült tanulási idő</p>
               <p className="text-lg font-semibold text-foreground">130 — 185 óra</p>
@@ -232,38 +211,32 @@ const LevelTestPage = () => {
     );
   }
 
+  // Testing
   if (questions.length === 0) return null;
-
   const q = questions[currentQ];
   const part = PARTS[currentPart];
-  const timeLeftSec = Math.ceil(timeLeft / 1000);
-  const timePercent = (timeLeft / TIME_PER_PART_MS) * 100;
+  const timePercent = (timeLeft / TIME_PER_PART_SEC) * 100;
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <div className="pt-20 sm:pt-24 pb-24 sm:pb-20 px-4 sm:px-6 max-w-2xl mx-auto flex flex-col items-center safe-bottom">
-        {/* Part header */}
         <div className="w-full flex items-center justify-between mb-3">
           <span className="text-xs font-medium px-3 py-1.5 rounded-full text-white" style={{ background: "#1565C0" }}>
             {part.label}
           </span>
-          <span className="text-sm font-medium" style={{ color: timeLeftSec <= 10 ? "#E91E63" : "inherit" }}>
-            {timeLeftSec}s
+          <span className="text-sm font-medium" style={{ color: timeLeft <= 10 ? "#E91E63" : "inherit" }}>
+            {timeLeft}s
           </span>
         </div>
 
-        {/* Timer bar */}
         <div className="w-full h-1.5 bg-secondary rounded-full mb-4">
           <motion.div
-            className="h-full rounded-full"
-            style={{ background: timeLeftSec <= 10 ? "#E91E63" : "#1565C0" }}
-            animate={{ width: `${timePercent}%` }}
-            transition={{ duration: 0.1 }}
+            className="h-full rounded-full transition-all duration-1000"
+            style={{ background: timeLeft <= 10 ? "#E91E63" : "#1565C0", width: `${timePercent}%` }}
           />
         </div>
 
-        {/* Question progress */}
         <div className="w-full flex items-center justify-between mb-6">
           <div className="flex gap-1.5">
             {questions.map((_, i) => (

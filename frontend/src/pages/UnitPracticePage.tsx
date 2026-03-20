@@ -7,6 +7,7 @@ import { fetchUnitLesson, UnitLessonData, WordData } from "@/utils/api";
 import { saveLessonResult } from "@/utils/progress";
 
 // Task components
+import VocabularyIntroTask from "@/components/tasks/VocabularyIntroTask";
 import VocabularyQuizTask from "@/components/tasks/VocabularyQuizTask";
 import TypingTask from "@/components/tasks/TypingTask";
 import GrammarExplanationTask from "@/components/tasks/GrammarExplanationTask";
@@ -23,9 +24,10 @@ import { addToReview } from "@/utils/sm2";
 // Flow: vocab intro (done in UnitLessonPage) → quiz → typing → grammar → sentence builder
 //       → fill gap → two options → dialogue → speaking → activity → results
 
-type V4TaskType = "quiz" | "typing" | "grammar" | "sentence" | "fill" | "twoOption" | "dialogue" | "speaking" | "activity";
+type V4TaskType = "vocabIntro" | "quiz" | "typing" | "grammar" | "sentence" | "fill" | "twoOption" | "dialogue" | "speaking" | "activity";
 
 const TASK_TYPE_LABELS: Record<V4TaskType, string> = {
+  vocabIntro: "Szókincs bemutatás",
   quiz: "Visszakérdezés",
   typing: "Begépelés",
   grammar: "Nyelvtan",
@@ -38,6 +40,7 @@ const TASK_TYPE_LABELS: Record<V4TaskType, string> = {
 };
 
 const TASK_TYPE_COLORS: Record<V4TaskType, string> = {
+  vocabIntro: "#E91E63",
   quiz: "#E91E63",
   typing: "#E91E63",
   grammar: "#4CAF50",
@@ -52,10 +55,12 @@ const TASK_TYPE_COLORS: Record<V4TaskType, string> = {
 interface TaskItem {
   type: V4TaskType;
   word?: WordData;
+  reverse?: boolean;  // For bidirectional quiz (HU→EN)
 }
 
 // Map task IDs to V4TaskType
 const TASK_ID_MAP: Record<number, V4TaskType> = {
+  1: "vocabIntro",
   2: "quiz",
   3: "typing",
   4: "grammar",
@@ -100,8 +105,15 @@ const UnitPracticePage = () => {
 
     const addTasksForType = (type: V4TaskType, list: TaskItem[]) => {
       switch (type) {
+        case "vocabIntro":
+          // Vocab intro uses all words as a group (handled by VocabularyIntroTask)
+          if (words.length > 0) list.push({ type: "vocabIntro" });
+          break;
         case "quiz":
-          for (const word of words.slice(0, 5)) list.push({ type: "quiz", word });
+          // EN→HU direction
+          for (const word of words.slice(0, 3)) list.push({ type: "quiz", word });
+          // HU→EN direction (reverse)
+          for (const word of words.slice(0, 3)) list.push({ type: "quiz", word, reverse: true });
           break;
         case "typing":
           for (const word of words.slice(0, 4)) list.push({ type: "typing", word });
@@ -136,8 +148,8 @@ const UnitPracticePage = () => {
       // Only build tasks for the requested type
       addTasksForType(singleTaskType, taskList);
     } else {
-      // Full lesson flow: all 10 task types in sequence
-      const allTypes: V4TaskType[] = ["quiz", "typing", "grammar", "sentence", "fill", "twoOption", "dialogue", "speaking", "activity"];
+      // Full lesson flow: all 10 task types in sequence (Greta v4 order)
+      const allTypes: V4TaskType[] = ["vocabIntro", "quiz", "typing", "grammar", "sentence", "fill", "twoOption", "dialogue", "speaking", "activity"];
       for (const type of allTypes) {
         addTasksForType(type, taskList);
       }
@@ -296,8 +308,11 @@ const UnitPracticePage = () => {
             transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
             className="w-full"
           >
+            {task.type === "vocabIntro" && lesson && (
+              <VocabularyIntroTask words={lesson.words.slice(0, 8)} onComplete={handleTaskComplete} />
+            )}
             {task.type === "quiz" && task.word && (
-              <VocabularyQuizTask word={task.word} onComplete={handleTaskComplete} />
+              <VocabularyQuizTask word={task.word} reverse={task.reverse} onComplete={handleTaskComplete} />
             )}
             {task.type === "typing" && task.word && (
               <TypingTask word={task.word} onComplete={handleTaskComplete} />
